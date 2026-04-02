@@ -1,22 +1,23 @@
-import React from 'react'
+import React, { Suspense, lazy, useEffect, useMemo } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { NotificationProvider, useNotifications } from './contexts/NotificationContext'
-import { AlertProvider, useAlert } from './contexts/AlertContext'
+import { NotificationProvider } from './contexts/NotificationContext'
+import { AlertProvider } from './contexts/AlertContext'
 
 import ToastStack from './components/ToastStack'
 import AlertStack from './components/AlertStack'
 import AnimatedLoader from './components/AnimatedLoader'
 import SessionManager from './components/SessionManager'
+import Seo from './components/Seo'
 
 import Landing from './pages/Landing'
-import AuthPage from './pages/Auth'
-import StudentDashboard from './pages/StudentDashboard'
-import AdminDashboard from './pages/AdminDashboard'
-import Notifications from './pages/Notifications'
 import { getDashboardRoute } from './utils/authRouting'
+
+const AuthPage = lazy(() => import('./pages/Auth'))
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const Notifications = lazy(() => import('./pages/Notifications'))
 
 function ProtectedRoute({ children, role }) {
   const { currentUser, profile, loading } = useAuth()
@@ -38,6 +39,54 @@ function MainRoutes() {
   const location = useLocation()
   const { currentUser, profile, loading } = useAuth()
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [location.pathname])
+
+  const seo = useMemo(() => {
+    if (location.pathname === '/') {
+      return {
+        title: 'Gyanvatsala Library | Focused Study Space and Reading Culture',
+        description: 'Join Gyanvatsala Library for focused study hours, stronger reading habits, disciplined routines, and a calm learning environment.',
+        path: '/',
+        robots: 'index,follow',
+        jsonLd: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebSite',
+              name: 'Gyanvatsala Library',
+              url: import.meta.env.VITE_SITE_URL || 'http://localhost:5173',
+              description: 'Library website for readers and students looking for disciplined study spaces, curated books, and a strong reading culture.',
+            },
+            {
+              '@type': 'Organization',
+              name: 'Gyanvatsala Library',
+              url: import.meta.env.VITE_SITE_URL || 'http://localhost:5173',
+              description: 'A student-focused library built around reading habits, concentration, disciplined study, and long-term academic growth.',
+            },
+          ],
+        },
+      }
+    }
+
+    if (location.pathname === '/auth') {
+      return {
+        title: 'Login | Gyanvatsala Library',
+        description: 'Secure sign in for students and admins of Gyanvatsala Library.',
+        path: '/auth',
+        robots: 'noindex,follow',
+      }
+    }
+
+    return {
+      title: 'Dashboard | Gyanvatsala Library',
+      description: 'Private dashboard for Gyanvatsala Library users.',
+      path: location.pathname,
+      robots: 'noindex,nofollow',
+    }
+  }, [location.pathname])
+
   if (loading) {
     return <AnimatedLoader />
   }
@@ -55,8 +104,9 @@ function MainRoutes() {
   )
 
   return (
-    <TransitionGroup>
-      <CSSTransition key={location.pathname} timeout={300} classNames="fade" unmountOnExit>
+    <>
+      <Seo {...seo} />
+      <Suspense fallback={<AnimatedLoader />}>
         <Routes location={location}>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<AuthPage />} />
@@ -94,8 +144,8 @@ function MainRoutes() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </CSSTransition>
-    </TransitionGroup>
+      </Suspense>
+    </>
   )
 }
 

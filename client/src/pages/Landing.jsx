@@ -1,281 +1,319 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { getDashboardRoute } from '../utils/authRouting'
+
+const heroImage = 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775065351/img11_dovqob.jpg'
 
 const bookCovers = [
-  { title: 'Sherlock Holmes', author: 'Arthur Conan Doyle', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775064792/img6_abwuxs.jpg' },
-  { title: 'Think and Grow Rich', author: 'Napoleon Hill', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775064790/img1_onzzaz.jpg' },
-  { title: 'Tom Sawyer', author: 'Mark Twain', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775064790/img4_jquh1s.jpg' },
-  { title: 'Rich Dad Poor Dad', author: 'Robert Kiyosaki', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775064792/img5_hxtfyr.jpg' },
-  { title: 'Dracula', author: 'Bram Stoker', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775064790/img2_n8khsm.jpg' },
-  { title: 'Alices Adventures in Wonderland', author: 'Jane Austen', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775064793/img3_buu1o7.avif' },
+  { title: 'Sherlock Holmes', author: 'Arthur Conan Doyle', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/f_auto,q_auto,w_320/v1775064792/img6_abwuxs.jpg' },
+  { title: 'Think and Grow Rich', author: 'Napoleon Hill', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/f_auto,q_auto,w_320/v1775064790/img1_onzzaz.jpg' },
+  { title: 'Tom Sawyer', author: 'Mark Twain', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/f_auto,q_auto,w_320/v1775064790/img4_jquh1s.jpg' },
+  { title: 'Rich Dad Poor Dad', author: 'Robert Kiyosaki', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/f_auto,q_auto,w_320/v1775064792/img5_hxtfyr.jpg' },
+  { title: 'Dracula', author: 'Bram Stoker', image: 'https://res.cloudinary.com/dghcsoc48/image/upload/f_auto,q_auto,w_320/v1775064790/img2_n8khsm.jpg' },
 ]
 
 const quotes = [
-  '"📚 Books don\'t teach you to hurry. They teach you the art of life."',
-  '"Between pages, futures are quietly being built."',
-  '"📖 Knowledge is the treasure, books are the map."',
-  '"✨ A reader lives a thousand lives before he dies."',
+  'A desk becomes sacred when discipline meets curiosity.',
+  'A good library turns scattered effort into a daily habit.',
+  'Quiet hours, sharp focus, and strong books build strong minds.',
+  'When your surroundings support study, progress stops feeling random.',
 ]
 
-// Typing Effect Component
-function TypingQuote({ quote, speed = 50 }) {
+const advantages = [
+  {
+    icon: '📖',
+    title: 'Peaceful Study Atmosphere',
+    body: 'Study in a calm, focused environment where distractions stay outside and your concentration lasts longer.',
+  },
+  {
+    icon: '⏰',
+    title: 'Better Daily Routine',
+    body: 'Fixed study hours and a disciplined setting help you stay regular instead of depending on motivation alone.',
+  },
+  {
+    icon: '📚',
+    title: 'Useful Reading Access',
+    body: 'Read from a curated collection of books that supports exams, self-growth, and serious reading habits.',
+  },
+]
+
+const reasonsToJoin = [
+  {
+    icon: '🎯',
+    title: 'Improves focus',
+    body: 'A structured library setting reduces noise and helps you spend more time in deep work.',
+  },
+  {
+    icon: '🌱',
+    title: 'Builds consistency',
+    body: 'Showing up to the same study space every day creates momentum and stronger long-term discipline.',
+  },
+  {
+    icon: '🤝',
+    title: 'Keeps you motivated',
+    body: 'When you study around serious learners, your own standards rise and staying committed becomes easier.',
+  },
+]
+
+function TypingQuote({ quote, speed = 40 }) {
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
 
   useEffect(() => {
-    if (!isTyping) return
+    setDisplayedText('')
+    setIsTyping(true)
+  }, [quote])
+
+  useEffect(() => {
+    if (!isTyping) return undefined
 
     if (displayedText.length < quote.length) {
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         setDisplayedText(quote.slice(0, displayedText.length + 1))
       }, speed)
-      return () => clearTimeout(timer)
-    } else {
-      setIsTyping(false)
+
+      return () => window.clearTimeout(timer)
     }
-  }, [displayedText, quote, isTyping, speed])
+
+    setIsTyping(false)
+    return undefined
+  }, [displayedText, isTyping, quote, speed])
 
   return <span>{displayedText}</span>
 }
 
 export default function Landing() {
-  const navigate = useNavigate()
   const { currentUser, profile } = useAuth()
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0)
   const [quoteKey, setQuoteKey] = useState(0)
 
-  React.useEffect(() => {
-    if (currentUser && profile?.role) {
-      navigate(`/admin`, { replace: true })
-    }
-  }, [currentUser, profile, navigate])
-
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
       setCurrentQuoteIndex((prev) => (prev + 1) % quotes.length)
       setQuoteKey((prev) => prev + 1)
     }, 6000)
-    return () => clearInterval(interval)
+
+    return () => window.clearInterval(interval)
   }, [])
 
+  if (currentUser && profile?.role) {
+    return <Navigate to={getDashboardRoute(profile.role)} replace />
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center bg-black/40 backdrop-blur-md border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <img src="/image/logo.svg" alt="Gyanvatsala" className="h-8 w-8" />
-          <span className="text-2xl font-bold hidden sm:inline">Gyanvatsala Library</span>
-          <span className="text-2xl font-bold sm:hidden">Gyanvatsala</span>
+    <div id="top" className="min-h-screen overflow-hidden bg-black text-white">
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/40 px-6 py-4 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/image/logo.svg" alt="Gyanvatsala" className="h-8 w-8" />
+            <span className="text-2xl font-bold tracking-tight hidden sm:inline">Gyanvatsala Library</span>
+            <span className="text-2xl font-bold tracking-tight sm:hidden">Gyanvatsala</span>
+          </Link>
+
+          <Link
+            to="/auth"
+            className="rounded-xl border border-white/10 bg-white/10 px-6 py-3 text-lg font-semibold transition hover:bg-white/15"
+          >
+            Login / Get Started
+          </Link>
         </div>
-        <button 
-          onClick={() => navigate('/auth')}
-          className="px-6 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg font-semibold transition"
-        >
-          Login / Get Started
-        </button>
       </nav>
 
-      {/* Netflix-like Hero Section */}
-      <section className="py-24 px-4 sm:px-6 relative bg-gradient-to-br from-blue-950 via-purple-950 to-blue-900">
-        <div className="max-w-6xl mx-auto">
-          {/* Hero Box Container with Background Image and Shadow */}
-          <div className="relative h-[500px] sm:h-[550px] rounded-3xl overflow-hidden shadow-2xl" style={{
-            boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05)"
-          }}>
-            {/* Background Image */}
-            <div className="absolute inset-0" style={{
-              backgroundImage: "url(/image/hero-bg.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center"
-            }} />
-            
-            {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60" />
-            
-            {/* Content Overlay */}
-            <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 sm:px-12 py-12">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 leading-tight text-white">
+      <section className="bg-gradient-to-br from-[#05081c] via-[#17123b] to-[#3a1250] px-4 pb-16 pt-28 sm:px-6 sm:pb-24">
+        <div className="mx-auto max-w-6xl">
+          <div
+            className="relative h-[500px] overflow-hidden rounded-[2rem] shadow-2xl sm:h-[560px]"
+            style={{
+              boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+            }}
+          >
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${heroImage})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/40 to-black/65" />
+
+            <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 py-12 text-center sm:px-12">
+              <h1 className="max-w-5xl text-5xl font-extrabold leading-[0.95] text-white sm:text-6xl md:text-7xl">
                 Unlimited books, reading, and more.
               </h1>
-              <p className="text-lg sm:text-xl text-gray-100 mb-12 max-w-3xl mx-auto leading-relaxed">
-                Access thousands of e-books, audiobooks and curated collections — anytime, anywhere.
+              <p className="mt-8 max-w-3xl text-lg leading-relaxed text-gray-100 sm:text-xl">
+                Join a disciplined library environment built for focused study hours, better reading habits,
+                and steady academic progress.
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button 
-                  onClick={() => navigate('/auth')}
-                  className="px-10 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-lg transition transform hover:scale-105 shadow-lg"
+
+              <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
+                <Link
+                  to="/auth"
+                  className="rounded-lg bg-red-600 px-10 py-3 text-lg font-bold text-white shadow-lg transition hover:scale-105 hover:bg-red-700"
                 >
                   Get Started
-                </button>
-                <button className="px-10 py-3 bg-gray-600/50 hover:bg-gray-700/60 text-white font-bold text-lg rounded-lg transition transform hover:scale-105 shadow-lg backdrop-blur-sm">
+                </Link>
+                <a
+                  href="#featured-books"
+                  className="rounded-lg bg-gray-600/50 px-10 py-3 text-lg font-bold text-white shadow-lg backdrop-blur-sm transition hover:scale-105 hover:bg-gray-700/60"
+                >
                   Browse
-                </button>
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Typing Quote Section */}
-      <section className="py-24 px-4 bg-slate-900">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-4xl md:text-5xl font-bold leading-relaxed text-gray-100 min-h-20 flex items-center justify-center">
+      <section className="bg-slate-950 px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="min-h-20 text-4xl font-bold leading-relaxed text-gray-100 md:text-5xl">
+            <span className="text-slate-300">"</span>{' '}
             <TypingQuote key={quoteKey} quote={quotes[currentQuoteIndex]} speed={40} />
-            <span className="ml-2 text-yellow-400 animate-pulse">|</span>
+            <span className="text-slate-300">"</span>
+            <span className="ml-2 animate-pulse text-slate-300">|</span>
           </p>
-          
-          <div className="flex justify-center gap-3 mt-12">
-            {quotes.map((_, i) => (
+
+          <div className="mt-12 flex justify-center gap-3">
+            {quotes.map((quote, index) => (
               <button
-                key={i}
+                key={quote}
+                type="button"
                 onClick={() => {
-                  setCurrentQuoteIndex(i)
+                  setCurrentQuoteIndex(index)
                   setQuoteKey((prev) => prev + 1)
                 }}
-                className={`w-3 h-3 rounded-full transition ${
-                  i === currentQuoteIndex ? 'bg-yellow-400 scale-150' : 'bg-gray-600 hover:bg-gray-500'
+                className={`h-3 w-3 rounded-full transition ${
+                  index === currentQuoteIndex ? 'scale-150 bg-yellow-400' : 'bg-gray-600 hover:bg-gray-500'
                 }`}
+                aria-label={`Show quote ${index + 1}`}
               />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Book Gallery Section - Netflix Style */}
-      <section className="py-20 px-4 bg-black">
-        <div className="max-w-7xl mx-auto">
+      <section id="featured-books" className="bg-[#0a0a0a] px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-2">📚 Featured Books</h2>
-            <p className="text-gray-400 text-lg">Discover our most popular collection</p>
+            <h2 className="text-4xl font-bold md:text-5xl">Featured Books</h2>
+            <p className="mt-2 text-lg text-gray-400">
+              A glimpse of the kind of reading that keeps your mind active and your routine meaningful.
+            </p>
           </div>
 
-          {/* Horizontal Scrollable Books */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {bookCovers.map((book, i) => (
-              <div key={i} className="group relative cursor-pointer">
-                <div className="relative overflow-hidden rounded-lg shadow-2xl bg-gray-800 aspect-[9/13] transform transition-all duration-300 hover:scale-110 hover:-translate-y-3">
-                  <img 
-                    src={book.image} 
-                    alt={book.title} 
-                    className="w-full h-full object-cover group-hover:brightness-110 transition duration-300"
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {bookCovers.map((book) => (
+              <article key={book.title} className="group relative cursor-pointer">
+                <div className="aspect-[9/13] overflow-hidden rounded-lg bg-gray-800 shadow-2xl transition-all duration-300 group-hover:-translate-y-3 group-hover:scale-105">
+                  <img
+                    src={book.image}
+                    alt={`${book.title} by ${book.author}`}
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
+                    className="h-full w-full object-cover transition duration-300 group-hover:brightness-110"
                   />
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col items-end justify-end p-4">
-                    <p className="text-sm font-bold text-white text-right">{book.title}</p>
-                    <p className="text-xs text-gray-300 text-right">{book.author}</p>
+                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-transparent to-transparent p-4 opacity-0 transition duration-300 group-hover:opacity-100">
+                    <p className="text-sm font-bold text-white">{book.title}</p>
+                    <p className="text-xs text-gray-300">{book.author}</p>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 bg-slate-900">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">What's Included?</h2>
+      <section id="advantages" className="bg-slate-900 px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center text-4xl font-bold md:text-5xl">Advantages of Joining the Library</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-10 rounded-2xl bg-slate-800 border border-slate-700 hover:border-slate-600 hover:shadow-2xl transition">
-              <div className="text-6xl mb-4">�</div>
-              <h3 className="text-xl font-bold mb-2">E-books & Audiobooks</h3>
-              <p className="text-gray-300 text-sm">Instant access to thousands of titles across genres and languages.</p>
-            </div>
-
-            <div className="p-10 rounded-2xl bg-slate-800 border border-slate-700 hover:border-slate-600 hover:shadow-2xl transition">
-              <div className="text-6xl mb-4">👥</div>
-              <h3 className="text-xl font-bold mb-2">Study Groups & Notes</h3>
-              <p className="text-gray-300 text-sm">Join study circles, share notes and prepare together for exams.</p>
-            </div>
-
-            <div className="p-10 rounded-2xl bg-slate-800 border border-slate-700 hover:border-slate-600 hover:shadow-2xl transition">
-              <div className="text-6xl mb-4">✨</div>
-              <h3 className="text-xl font-bold mb-2">Personalized Picks</h3>
-              <p className="text-gray-300 text-sm">Smart recommendations based on what you read and like.</p>
-            </div>
+          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+            {advantages.map((item) => (
+              <article
+                key={item.title}
+                className="rounded-2xl border border-slate-700 bg-slate-800 p-10 transition hover:border-slate-600 hover:shadow-2xl"
+              >
+                <div className="mb-4 text-5xl">{item.icon}</div>
+                <h3 className="text-2xl font-bold">{item.title}</h3>
+                <p className="mt-4 text-base leading-7 text-gray-300">{item.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Why Join Section */}
-      <section className="py-20 px-4 bg-slate-900">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">Why join Gyanvatsala?</h2>
+      <section className="bg-slate-900 px-4 pb-20 sm:px-6">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center text-4xl font-bold md:text-5xl">Why Join Gyanvatsala?</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-10 rounded-2xl bg-slate-800 border border-slate-700 hover:border-slate-600 transition hover:shadow-2xl">
-              <div className="text-6xl mb-4">📚</div>
-              <h4 className="text-xl font-bold mb-2">Huge Library</h4>
-              <p className="text-gray-300 text-sm">Thousands of e-books and audiobooks across subjects and interests.</p>
-            </div>
-
-            <div className="p-10 rounded-2xl bg-slate-800 border border-slate-700 hover:border-slate-600 transition hover:shadow-2xl">
-              <div className="text-6xl mb-4">🤝</div>
-              <h4 className="text-xl font-bold mb-2">Collaborative Learning</h4>
-              <p className="text-gray-300 text-sm">Study groups, shared notes and focused reading lists built by students.</p>
-            </div>
-
-            <div className="p-10 rounded-2xl bg-slate-800 border border-slate-700 hover:border-slate-600 transition hover:shadow-2xl">
-              <div className="text-6xl mb-4">🎯</div>
-              <h4 className="text-xl font-bold mb-2">Smart Recommendations</h4>
-              <p className="text-gray-300 text-sm">Personalized suggestions so you always find something worth reading.</p>
-            </div>
+          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+            {reasonsToJoin.map((item) => (
+              <article
+                key={item.title}
+                className="rounded-2xl border border-slate-700 bg-slate-800 p-10 transition hover:border-slate-600 hover:shadow-2xl"
+              >
+                <div className="mb-4 text-5xl">{item.icon}</div>
+                <h3 className="text-2xl font-bold">{item.title}</h3>
+                <p className="mt-4 text-base leading-7 text-gray-300">{item.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-slate-900">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-5xl md:text-6xl font-bold mb-6">Ready to start reading?</h2>
-          <p className="text-xl text-gray-200 mb-10">Join thousands of students exploring unlimited books today.</p>
-          <button 
-            onClick={() => navigate('/auth')}
-            className="px-12 py-4 bg-red-600 hover:bg-red-700 text-white text-xl font-bold rounded-lg transition transform hover:scale-105 shadow-2xl"
+      <section className="bg-slate-900 px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-5xl font-bold md:text-6xl">Ready to build a stronger study routine?</h2>
+          <p className="mt-6 text-xl text-gray-200">
+            Join Gyanvatsala Library and give your reading, revision, and focus a place that supports them every day.
+          </p>
+          <Link
+            to="/auth"
+            className="mt-10 inline-flex rounded-lg bg-red-600 px-12 py-4 text-xl font-bold text-white shadow-2xl transition hover:scale-105 hover:bg-red-700"
           >
             Get Started Now
-          </button>
+          </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-black border-t border-white/10 px-6 py-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+      <footer className="border-t border-white/10 bg-black px-6 py-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
             <div>
-              <h3 className="text-2xl font-bold mb-4">📚 Gyanvatsala</h3>
-              <p className="text-gray-400 text-base">Your campus library, reimagined. Read, learn, and collaborate.</p>
+              <h3 className="text-2xl font-bold">Gyanvatsala Library</h3>
+              <p className="mt-4 text-base text-gray-400">
+                A disciplined reading and study space for students who want stronger habits and better focus.
+              </p>
             </div>
+
             <div>
-              <h4 className="font-bold text-lg mb-6">Browse</h4>
+              <h4 className="mb-6 text-lg font-bold">Explore</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">Browse Books</a></li>
-                <li><a href="#" className="hover:text-white transition">My Library</a></li>
-                <li><a href="#" className="hover:text-white transition">Trending Now</a></li>
+                <li><a href="#featured-books" className="transition hover:text-white">Featured Books</a></li>
+                <li><a href="#advantages" className="transition hover:text-white">Library Advantages</a></li>
+                <li><a href="#top" className="transition hover:text-white">Back to Top</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-bold text-lg mb-6">Support</h4>
+              <h4 className="mb-6 text-lg font-bold">For Visitors</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition">FAQ</a></li>
+                <li>Peaceful study atmosphere</li>
+                <li>Curated reading collection</li>
+                <li>Disciplined daily routine</li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-bold text-lg mb-6">Connect</h4>
+              <h4 className="mb-6 text-lg font-bold">Start</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition">Feedback</a></li>
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
+                <li><Link to="/auth" className="transition hover:text-white">Login</Link></li>
+                <li><Link to="/auth" className="transition hover:text-white">Join Now</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-white/10 pt-8 text-center text-gray-500">
-            <p className="text-base">© 2026 Gyanvatsala Library. All rights reserved. | Designed with 📚 for students</p>
+
+          <div className="mt-12 border-t border-white/10 pt-8 text-center text-base text-gray-500">
+            <p>© 2026 Gyanvatsala Library. All rights reserved.</p>
           </div>
         </div>
       </footer>
