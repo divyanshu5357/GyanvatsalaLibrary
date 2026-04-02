@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { getDueDate, isPaidForCurrentCycle } from '../utils/feeStatus'
 
-// Use relative paths in development (proxied by Vite)
-const apiBase = import.meta.env.VITE_API_BASE_URL || ''
-
 export function DefaultersList({ students = [] }) {
   const defaulters = students.filter(s => {
     const hasPayment = isPaidForCurrentCycle(s)

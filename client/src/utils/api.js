@@ -2,7 +2,8 @@ import { supabase } from '../supabase'
 
 // Use relative paths in development (proxied by Vite)
 // Use full URL only if explicitly set in .env
-export const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+const rawApiBase = import.meta.env.VITE_API_BASE_URL || ''
+export const apiBase = rawApiBase.replace(/\/+$/, '')
 
 export async function authFetch(path, options = {}) {
   if (!supabase) {

@@ -6,33 +6,40 @@ import { fileURLToPath } from 'url'
 // Load environment variables
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const envPath = path.join(__dirname, '.env')
+const envPaths = [
+  path.join(__dirname, 'server', '.env'),
+  path.join(__dirname, '.env'),
+]
 
 function loadEnv() {
-  if (!fs.existsSync(envPath)) {
-    console.error('❌ .env file not found')
-    return {}
+  for (const envPath of envPaths) {
+    if (!fs.existsSync(envPath)) continue
+
+    const envContent = fs.readFileSync(envPath, 'utf8')
+    const env = {}
+
+    envContent.split('\n').forEach(line => {
+      const trimmedLine = line.trim()
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const [key, ...valueParts] = trimmedLine.split('=')
+        const value = valueParts.join('=').trim()
+        if (key && value) {
+          env[key] = value
+        }
+      }
+    })
+
+    return env
   }
 
-  const envContent = fs.readFileSync(envPath, 'utf8')
-  const env = {}
-  
-  envContent.split('\n').forEach(line => {
-    const trimmedLine = line.trim()
-    if (trimmedLine && !trimmedLine.startsWith('#')) {
-      const [key, ...valueParts] = trimmedLine.split('=')
-      const value = valueParts.join('=').trim()
-      if (key && value) {
-        env[key] = value
-      }
-    }
-  })
-
-  return env
+  console.error('❌ .env file not found')
+  return {}
 }
 
 const env = loadEnv()
-const supabaseAdmin = createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_SERVICE_ROLE_KEY)
+const supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL
+const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_SERVICE_ROLE_KEY
+const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
 /**
  * Create admin profile row manually
