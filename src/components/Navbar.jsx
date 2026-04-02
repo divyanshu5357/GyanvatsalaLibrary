@@ -32,10 +32,10 @@ export default function Navbar({ onMenuToggle, mobileMenuOpen }) {
 
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <span className="text-2xl">📚</span>
+          <img src="/image/logo.svg" alt="Gyanvatsala Logo" className="h-8 w-8" />
           <div className="hidden sm:block">
             <div className="text-sm font-bold text-slate-300">Gyanvatsala</div>
-            <div className="text-xs text-slate-500">Library Management</div>
+            <div className="text-xs text-slate-500">Library</div>
           </div>
         </div>
       </div>

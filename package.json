@@ -1,6 +1,7 @@
 {
-  "name": "smart-study-room-management",
+  "name": "gyanvatsala-library",
   "version": "0.1.0",
+  "description": "Gyanvatsala Library - Professional Library Management System",
   "type": "module",
   "private": true,
   "scripts": {

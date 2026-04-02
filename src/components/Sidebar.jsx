@@ -17,8 +17,8 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
       {/* Desktop Sidebar - Always visible on desktop */}
       <aside className="hidden lg:flex lg:flex-col w-64 bg-slate-800/50 border-r border-slate-700 min-h-screen fixed left-0 top-16 bottom-0 p-4 overflow-y-auto z-10">
         <div className="text-xl font-bold mb-8 text-white flex items-center gap-2">
-          <span>📚</span>
-          <span>Admin</span>
+          <img src="/image/logo.svg" alt="Gyanvatsala" className="h-6 w-6" />
+          <span>Gyanvatsala</span>
         </div>
         <nav className="flex flex-col gap-1 space-y-1">
           {navItems.map(item => (
@@ -52,7 +52,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
           {/* Drawer */}
           <nav className="fixed left-0 top-16 w-72 max-w-80 h-[calc(100vh-64px)] bg-slate-800 border-r border-slate-700 p-4 overflow-y-auto z-40 flex flex-col gap-2 shadow-2xl">
             <div className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <span>📚</span>
+              <img src="/image/logo.svg" alt="Gyanvatsala" className="h-5 w-5" />
               <span>Menu</span>
             </div>
             {navItems.map(item => (

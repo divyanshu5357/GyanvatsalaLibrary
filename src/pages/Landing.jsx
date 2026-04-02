@@ -63,7 +63,11 @@ export default function Landing() {
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center bg-black/40 backdrop-blur-md border-b border-white/10">
-        <div className="text-2xl font-bold">📚 Gyanvatsala Library</div>
+        <div className="flex items-center gap-2">
+          <img src="/image/logo.svg" alt="Gyanvatsala" className="h-8 w-8" />
+          <span className="text-2xl font-bold hidden sm:inline">Gyanvatsala Library</span>
+          <span className="text-2xl font-bold sm:hidden">Gyanvatsala</span>
+        </div>
         <button 
           onClick={() => navigate('/auth')}
           className="px-6 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg font-semibold transition"
