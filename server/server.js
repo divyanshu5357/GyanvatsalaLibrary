@@ -56,7 +56,7 @@ function isAllowedOrigin(origin, allowedOrigins, allowVercelPreviews, allowRende
 
 const env = {
   ...loadEnv(),
-\  ...process.env,
+  ...process.env,
 }
 
 const frontendDistPath = path.join(__dirname, '..', 'client', 'dist')
