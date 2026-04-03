@@ -58,6 +58,10 @@ const env = {
   ...process.env,
 }
 
+const frontendDistPath = path.join(__dirname, '..', 'client', 'dist')
+const frontendIndexPath = path.join(frontendDistPath, 'index.html')
+const hasFrontendBuild = fs.existsSync(frontendIndexPath)
+
 const frontendUrl = env.FRONTEND_URL || env.VITE_FRONTEND_URL
 const allowedOrigins = new Set([
   'http://localhost:5173',
@@ -1550,13 +1554,41 @@ app.get('/api/admin/trigger-reminders', requireAuth, requireRole('admin'), async
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })
 })
+const frontendPath = path.join(__dirname, '../client/dist')
 
-app.get('/', (_req, res) => {
+app.use(express.static(frontendPath))
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'))
+})
+app.get('/api', (_req, res) => {
   res.json({
     name: 'Gyanvatsala Library API',
     status: 'ok',
   })
 })
+
+if (hasFrontendBuild) {
+  app.use(express.static(frontendDistPath))
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path === '/api' || req.path === '/health') {
+      return next()
+    }
+
+    return res.sendFile(frontendIndexPath)
+  })
+} else {
+  console.warn(`⚠️ Frontend build not found at ${frontendIndexPath}`)
+
+  app.get('/', (_req, res) => {
+    res.json({
+      name: 'Gyanvatsala Library API',
+      status: 'ok',
+      frontend: 'missing build output',
+    })
+  })
+}
 
 const PORT = Number(env.PORT) || 3001
 app.listen(PORT, () => {
