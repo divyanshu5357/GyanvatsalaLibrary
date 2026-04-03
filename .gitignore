@@ -44,3 +44,15 @@ pids/
 # Misc
 .eslintcache
 .cache/
+
+# Documentation and setup files (not needed in repo)
+*.txt
+*.sql
+*.sh
+RENDER_*.txt
+AUTO_*.md
+FIX_*.md
+TESTING_*.md
+FEATURES_*.md
+BACKEND_*.md
+EBOOKS_*.md
