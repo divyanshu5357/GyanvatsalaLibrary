@@ -17,6 +17,42 @@ Backend runs on `http://localhost:3001`.
 
 ## Deployment
 
+### Render Blueprint
+
+If you want both the frontend and backend on Render, do not create only a single Web Service.
+Use the repo's [render.yaml](/Users/sakshisingh/Desktop/Frontend/react_js/LibararyManagment/render.yaml) as a Blueprint so Render creates:
+
+- `gyanvatsala-library-web`: static site for the React frontend
+- `gyanvatsala-library-api`: web service for the Express API
+
+Steps:
+
+1. Push the latest repo changes to GitHub.
+2. In Render, choose `New` -> `Blueprint`.
+3. Select this repository and branch.
+4. Render will detect `render.yaml` and show both services.
+5. Fill the required secret values when prompted:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_CLOUDINARY_CLOUD_NAME`
+   - `VITE_CLOUDINARY_UPLOAD_PRESET`
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `VAPID_PUBLIC_KEY`
+   - `VAPID_PRIVATE_KEY`
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+6. Deploy the Blueprint.
+
+Notes:
+
+- The backend root URL returns JSON by design because it is API-only.
+- The actual website UI will be on the static site URL created for `gyanvatsala-library-web`.
+- `render.yaml` automatically connects:
+  - frontend `VITE_API_BASE_URL` -> backend public URL
+  - backend `FRONTEND_URL` -> frontend public URL
+
 ### Vercel
 
 1. Import this repo in Vercel.
@@ -25,11 +61,11 @@ Backend runs on `http://localhost:3001`.
 4. Add `VITE_API_BASE_URL` pointing to your deployed backend.
 5. Add the remaining `VITE_*` frontend env vars.
 
-### Render
+### Render API Only
 
 1. Create a new Web Service from this repo.
 2. Set Root Directory to `server`.
 3. Build command: `npm install`
 4. Start command: `npm start`
 5. Add the server env vars from `server/.env.example`.
-6. Set `FRONTEND_URL` to your Vercel app URL.
+6. Set `FRONTEND_URL` to your frontend app URL.
