@@ -46,10 +46,11 @@ function parseEnvList(value) {
     .filter(Boolean)
 }
 
-function isAllowedOrigin(origin, allowedOrigins, allowVercelPreviews) {
+function isAllowedOrigin(origin, allowedOrigins, allowVercelPreviews, allowRenderPreviews) {
   if (!origin) return true
   if (allowedOrigins.has(origin)) return true
   if (allowVercelPreviews && /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return true
+  if (allowRenderPreviews && /^https:\/\/[a-z0-9-]+\.onrender\.com$/i.test(origin)) return true
   return false
 }
 
@@ -68,15 +69,18 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:5173',
   'http://localhost:4173',
   'http://127.0.0.1:4173',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
   ...parseEnvList(env.ALLOWED_ORIGINS),
   ...parseEnvList(frontendUrl),
 ])
 const allowVercelPreviews = String(env.ALLOW_VERCEL_PREVIEWS || '').toLowerCase() === 'true'
+const allowRenderPreviews = String(env.ALLOW_RENDER_PREVIEWS || 'true').toLowerCase() === 'true'
 
 const app = express()
 app.use(cors({
   origin(origin, callback) {
-    if (isAllowedOrigin(origin, allowedOrigins, allowVercelPreviews)) {
+    if (isAllowedOrigin(origin, allowedOrigins, allowVercelPreviews, allowRenderPreviews)) {
       return callback(null, true)
     }
     return callback(new Error(`Origin ${origin} not allowed by CORS`))

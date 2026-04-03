@@ -38,15 +38,36 @@ function loadEnv() {
 const env = loadEnv()
 
 const app = express()
+
+// CORS configuration - Allow requests from frontend domains
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+]
+
+// Add Render frontend URL if running on Render
+if (process.env.RENDER === 'true') {
+  const frontendUrl = env.FRONTEND_URL || 'https://gyanvatsala-library-web.onrender.com'
+  if (frontendUrl && !allowedOrigins.includes(frontendUrl)) {
+    allowedOrigins.push(frontendUrl)
+  }
+}
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:4173',
-    'http://127.0.0.1:4173',
-  ],
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.includes('onrender.com')) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }))
 app.use(express.json())
 
