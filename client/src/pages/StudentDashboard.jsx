@@ -14,6 +14,7 @@ export default function StudentDashboard() {
   const [student, setStudent] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [passwordStatus, setPasswordStatus] = useState('')
   const [avatarInput, setAvatarInput] = useState('')
@@ -89,8 +90,17 @@ export default function StudentDashboard() {
   async function handlePasswordChange(e) {
     e.preventDefault()
     setPasswordStatus('')
+    
+    if (!oldPassword || oldPassword.length < 1) {
+      setPasswordStatus('Please enter your current password.')
+      return
+    }
     if (!newPassword || newPassword.length < 8) {
-      setPasswordStatus('Password should be at least 8 characters long.')
+      setPasswordStatus('New password should be at least 8 characters long.')
+      return
+    }
+    if (oldPassword === newPassword) {
+      setPasswordStatus('New password cannot be the same as old password.')
       return
     }
     if (!supabase) {
@@ -99,9 +109,27 @@ export default function StudentDashboard() {
     }
 
     try {
+      // Get current user email
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error('Unable to get current user')
+
+      // Verify old password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: oldPassword,
+      })
+      
+      if (signInError) {
+        setPasswordStatus('❌ Current password is incorrect.')
+        return
+      }
+
+      // Old password is correct, now update to new password
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
       if (updateError) throw updateError
-      setPasswordStatus('✅ Password updated. Use the new password next login.')
+      
+      setPasswordStatus('✅ Password updated successfully. Use the new password next login.')
+      setOldPassword('')
       setNewPassword('')
     } catch (err) {
       setPasswordStatus('❌ ' + err.message)
@@ -384,9 +412,16 @@ export default function StudentDashboard() {
                     <form onSubmit={handlePasswordChange} className="space-y-2">
                       <input
                         type="password"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        placeholder="Current password"
+                        className="w-full p-2.5 rounded bg-transparent border border-slate-600"
+                      />
+                      <input
+                        type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="New password"
+                        placeholder="New password (min 8 characters)"
                         className="w-full p-2.5 rounded bg-transparent border border-slate-600"
                       />
                       <button className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 rounded-lg hover:bg-emerald-700">Update Password</button>
