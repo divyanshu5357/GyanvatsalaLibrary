@@ -1,4 +1,28 @@
 import React, { useEffect, useState } from 'react'
+
+// MobileSlider component for horizontal swipe/slide on mobile
+function MobileSlider({ items, renderItem, autoSlideInterval = 1000 }) {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setIndex((i) => (i + 1) % items.length), autoSlideInterval);
+    return () => clearTimeout(timer);
+  }, [index, items.length, autoSlideInterval]);
+  return (
+    <div className="relative w-full flex flex-col items-center">
+      <div className="flex items-center justify-center w-full">
+        <div className="transition-transform duration-500 w-full flex justify-center">
+          {renderItem(items[index], index)}
+        </div>
+      </div>
+      <div className="flex justify-center gap-2 mt-4">
+        {items.map((_, i) => (
+          <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-violet-400' : 'bg-gray-600'}`}></span>
+        ))}
+      </div>
+    </div>
+  );
+}
+import FeatureFlipCarousel from '../components/FeatureFlipCarousel'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getDashboardRoute } from '../utils/authRouting'
@@ -56,6 +80,50 @@ const reasonsToJoin = [
   },
 ]
 
+// Library Features Section Data
+const libraryFeatures = [
+  {
+    icon: '🧠',
+    title: 'Study-Friendly Environment',
+    body: 'A calm and distraction-free space designed to improve focus and productivity.',
+  },
+  {
+    icon: '📰',
+    title: 'Daily Newspapers (Hindi & English)',
+    body: 'Stay updated with current affairs through both Hindi and English newspapers.',
+  },
+  {
+    icon: '📶',
+    title: 'High-Speed Wi-Fi',
+    body: 'Access fast and reliable internet for online study, research, and learning.',
+  },
+  {
+    icon: '❄️',
+    title: 'Air-Conditioned Rooms',
+    body: 'Comfortable air-conditioned rooms to ensure a pleasant study experience.',
+  },
+  {
+    icon: '🪑',
+    title: 'Limited Seating (Only 40 Seats)',
+    body: 'Limited seats to maintain discipline, reduce noise, and enhance concentration.',
+  },
+  {
+    icon: '💺',
+    title: 'Comfortable Seating',
+    body: 'Ergonomic chairs and desks designed for long and comfortable study hours.',
+  },
+  {
+    icon: '📹',
+    title: '24/7 CCTV Surveillance',
+    body: 'Continuous monitoring to ensure safety and security for all students.',
+  },
+  {
+    icon: '💧',
+    title: 'RO Drinking Water',
+    body: 'Clean and safe drinking water available for everyone.',
+  },
+]
+
 function TypingQuote({ quote, speed = 40 }) {
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
@@ -104,26 +172,27 @@ export default function Landing() {
   return (
     <div id="top" className="min-h-screen overflow-hidden bg-black text-white">
       <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/40 px-6 py-4 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2">
+        <div className="mx-auto flex flex-col sm:flex-row max-w-7xl items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2 mb-2 sm:mb-0">
             <img src="/image/logo.svg" alt="Gyanvatsala" className="h-8 w-8" />
             <span className="text-2xl font-bold tracking-tight hidden sm:inline">Gyanvatsala Library</span>
             <span className="text-2xl font-bold tracking-tight sm:hidden">Gyanvatsala</span>
           </Link>
-
           <Link
             to="/auth"
-            className="rounded-xl border border-white/10 bg-white/10 px-6 py-3 text-lg font-semibold transition hover:bg-white/15"
+            className="rounded-xl border border-white/10 bg-white/10 px-6 py-3 text-lg font-semibold transition hover:bg-white/15 w-full sm:w-auto text-center"
           >
             Login / Get Started
           </Link>
         </div>
       </nav>
+      {/* Spacer for fixed navbar on mobile */}
+      <div className="block sm:hidden" style={{ height: '90px' }} />
 
       <section className="bg-gradient-to-br from-[#05081c] via-[#17123b] to-[#3a1250] px-4 pb-16 pt-28 sm:px-6 sm:pb-24">
         <div className="mx-auto max-w-6xl">
           <div
-            className="relative h-[500px] overflow-hidden rounded-[2rem] shadow-2xl sm:h-[560px]"
+            className="relative min-h-[600px] sm:min-h-[700px] flex items-center justify-center overflow-hidden rounded-[2rem] shadow-2xl"
             style={{
               boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05)',
             }}
@@ -134,16 +203,16 @@ export default function Landing() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/40 to-black/65" />
 
-            <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 py-12 text-center sm:px-12">
-              <h1 className="max-w-5xl text-5xl font-extrabold leading-[0.95] text-white sm:text-6xl md:text-7xl">
+            <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 text-center w-full max-w-3xl mx-auto">
+              <h1 className="w-full text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-white">
                 Unlimited books, reading, and more.
               </h1>
-              <p className="mt-8 max-w-3xl text-lg leading-relaxed text-gray-100 sm:text-xl">
+              <p className="mt-8 w-full text-base sm:text-lg md:text-xl leading-relaxed text-gray-100">
                 Join a disciplined library environment built for focused study hours, better reading habits,
                 and steady academic progress.
               </p>
 
-              <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
+              <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:justify-center w-full">
                 <Link
                   to="/auth"
                   className="rounded-lg bg-red-600 px-10 py-3 text-lg font-bold text-white shadow-lg transition hover:scale-105 hover:bg-red-700"
@@ -190,6 +259,7 @@ export default function Landing() {
         </div>
       </section>
 
+
       <section id="featured-books" className="bg-[#0a0a0a] px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12">
@@ -199,7 +269,27 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {/* Responsive Book Slider for Mobile, Grid for Desktop */}
+          <div className="block sm:hidden">
+            <MobileSlider items={bookCovers} renderItem={(book) => (
+              <article key={book.title} className="group relative cursor-pointer w-64 mx-auto">
+                <div className="aspect-[9/13] overflow-hidden rounded-lg bg-gray-800 shadow-2xl transition-all duration-300 group-hover:-translate-y-3 group-hover:scale-105">
+                  <img
+                    src={book.image}
+                    alt={`${book.title} by ${book.author}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition duration-300 group-hover:brightness-110"
+                  />
+                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-transparent to-transparent p-4 opacity-0 transition duration-300 group-hover:opacity-100">
+                    <p className="text-sm font-bold text-white">{book.title}</p>
+                    <p className="text-xs text-gray-300">{book.author}</p>
+                  </div>
+                </div>
+              </article>
+            )} />
+          </div>
+          <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {bookCovers.map((book) => (
               <article key={book.title} className="group relative cursor-pointer">
                 <div className="aspect-[9/13] overflow-hidden rounded-lg bg-gray-800 shadow-2xl transition-all duration-300 group-hover:-translate-y-3 group-hover:scale-105">
@@ -208,7 +298,6 @@ export default function Landing() {
                     alt={`${book.title} by ${book.author}`}
                     loading="lazy"
                     decoding="async"
-                    fetchPriority="low"
                     className="h-full w-full object-cover transition duration-300 group-hover:brightness-110"
                   />
                   <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-transparent to-transparent p-4 opacity-0 transition duration-300 group-hover:opacity-100">
@@ -219,23 +308,100 @@ export default function Landing() {
               </article>
             ))}
           </div>
+
+        </div>
+      </section>
+
+      {/* Library Features Section - Flip Carousel */}
+      <section id="library-features" className="bg-gradient-to-br from-[#181c2e] via-[#23204a] to-[#2e1a4d] px-4 py-20 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <h2 className="text-4xl font-bold md:text-5xl">📚 Library Features</h2>
+            <p className="mt-2 text-lg text-gray-200">
+              Everything you need for a focused, comfortable, and productive study experience.
+            </p>
+          </div>
+          {/* Mobile horizontal slider for features */}
+          <div className="block sm:hidden">
+            <MobileSlider
+              items={libraryFeatures}
+              autoSlideInterval={1000}
+              renderItem={(feature, idx) => (
+                <div
+                  className="group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
+                  onClick={e => e.currentTarget.classList.toggle('flipped')}
+                >
+                  <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                    {/* Front */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-violet-700/30 bg-[#1a1c2e] shadow-xl text-7xl text-white transition-all duration-500 [backface-visibility:hidden]">
+                      {feature.icon}
+                    </div>
+                    {/* Back */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-violet-700/30 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-xl text-center px-6 text-white [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                      <div className="mb-2 text-3xl font-bold">{feature.title}</div>
+                      <div className="text-base text-gray-100">{feature.body}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+          {/* Desktop carousel as before */}
+          <div className="hidden sm:block">
+            <FeatureFlipCarousel features={libraryFeatures} cardsPerSlide={3} autoSlideInterval={3000} />
+          </div>
         </div>
       </section>
 
       <section id="advantages" className="bg-slate-900 px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-center text-4xl font-bold md:text-5xl">Advantages of Joining the Library</h2>
-
-          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-            {advantages.map((item) => (
-              <article
+          {/* Mobile horizontal slider for advantages */}
+          <div className="block md:hidden mt-16">
+            <MobileSlider
+              items={advantages}
+              autoSlideInterval={1000}
+              renderItem={(item, idx) => (
+                <div
+                  className="group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
+                  onClick={e => e.currentTarget.classList.toggle('flipped')}
+                >
+                  <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                    {/* Front */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
+                      {item.icon}
+                    </div>
+                    {/* Back */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                      <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
+                      <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+          {/* Desktop grid as before */}
+          <div className="hidden md:grid mt-16 grid-cols-1 gap-8 md:grid-cols-3">
+            {advantages.map((item, idx) => (
+              <div
                 key={item.title}
-                className="rounded-2xl border border-slate-700 bg-slate-800 p-10 transition hover:border-slate-600 hover:shadow-2xl"
+                className="group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
+                onMouseEnter={e => e.currentTarget.classList.add('flipped')}
+                onMouseLeave={e => e.currentTarget.classList.remove('flipped')}
               >
-                <div className="mb-4 text-5xl">{item.icon}</div>
-                <h3 className="text-2xl font-bold">{item.title}</h3>
-                <p className="mt-4 text-base leading-7 text-gray-300">{item.body}</p>
-              </article>
+                <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                  {/* Front */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
+                    {item.icon}
+                  </div>
+                  {/* Back */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                    <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
+                    <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -244,17 +410,52 @@ export default function Landing() {
       <section className="bg-slate-900 px-4 pb-20 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-center text-4xl font-bold md:text-5xl">Why Join Gyanvatsala?</h2>
-
-          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-            {reasonsToJoin.map((item) => (
-              <article
+          {/* Mobile horizontal slider for reasons */}
+          <div className="block md:hidden mt-16">
+            <MobileSlider
+              items={reasonsToJoin}
+              autoSlideInterval={2000}
+              renderItem={(item, idx) => (
+                <div
+                  className="group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
+                  onClick={e => e.currentTarget.classList.toggle('flipped')}
+                >
+                  <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                    {/* Front */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
+                      {item.icon}
+                    </div>
+                    {/* Back */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                      <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
+                      <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+          {/* Desktop grid as before */}
+          <div className="hidden md:grid mt-16 grid-cols-1 gap-8 md:grid-cols-3">
+            {reasonsToJoin.map((item, idx) => (
+              <div
                 key={item.title}
-                className="rounded-2xl border border-slate-700 bg-slate-800 p-10 transition hover:border-slate-600 hover:shadow-2xl"
+                className="group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
+                onMouseEnter={e => e.currentTarget.classList.add('flipped')}
+                onMouseLeave={e => e.currentTarget.classList.remove('flipped')}
               >
-                <div className="mb-4 text-5xl">{item.icon}</div>
-                <h3 className="text-2xl font-bold">{item.title}</h3>
-                <p className="mt-4 text-base leading-7 text-gray-300">{item.body}</p>
-              </article>
+                <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                  {/* Front */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
+                    {item.icon}
+                  </div>
+                  {/* Back */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                    <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
+                    <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -275,48 +476,49 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-white/10 bg-black px-6 py-16">
+      <footer className="border-t border-white/10 bg-black px-6 pt-12 pb-4 animate-fadeInUp">
         <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
-            <div>
-              <h3 className="text-2xl font-bold">Gyanvatsala Library</h3>
-              <p className="mt-4 text-base text-gray-400">
-                A disciplined reading and study space for students who want stronger habits and better focus.
-              </p>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+              <h3 className="text-2xl font-bold transition-colors duration-300 hover:text-violet-400">Gyanvatsala Library</h3>
+              <p className="mt-4 text-base text-gray-400">A disciplined reading and study space for students who want stronger habits and better focus.</p>
             </div>
-
-            <div>
-              <h4 className="mb-6 text-lg font-bold">Explore</h4>
+            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+              <h4 className="mb-6 text-lg font-bold transition-colors duration-300 hover:text-violet-400">Explore</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="#featured-books" className="transition hover:text-white">Featured Books</a></li>
-                <li><a href="#advantages" className="transition hover:text-white">Library Advantages</a></li>
-                <li><a href="#top" className="transition hover:text-white">Back to Top</a></li>
+                <li><a href="#featured-books" className="transition-all duration-300 hover:text-violet-400 hover:underline">Featured Books</a></li>
+                <li><a href="#advantages" className="transition-all duration-300 hover:text-violet-400 hover:underline">Library Advantages</a></li>
+                <li><a href="#top" className="transition-all duration-300 hover:text-violet-400 hover:underline">Back to Top</a></li>
               </ul>
             </div>
-
-            <div>
-              <h4 className="mb-6 text-lg font-bold">For Visitors</h4>
+            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+              <h4 className="mb-6 text-lg font-bold transition-colors duration-300 hover:text-violet-400">For Visitors</h4>
               <ul className="space-y-3 text-gray-400">
-                <li>Peaceful study atmosphere</li>
-                <li>Curated reading collection</li>
-                <li>Disciplined daily routine</li>
+                <li className="transition-all duration-300 hover:text-violet-400">Peaceful study atmosphere</li>
+                <li className="transition-all duration-300 hover:text-violet-400">Curated reading collection</li>
+                <li className="transition-all duration-300 hover:text-violet-400">Disciplined daily routine</li>
               </ul>
             </div>
-
-            <div>
-              <h4 className="mb-6 text-lg font-bold">Start</h4>
+            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+              <h4 className="mb-6 text-lg font-bold transition-colors duration-300 hover:text-violet-400">Start</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><Link to="/auth" className="transition hover:text-white">Login</Link></li>
-                <li><Link to="/auth" className="transition hover:text-white">Join Now</Link></li>
+                <li><Link to="/auth" className="transition-all duration-300 hover:text-violet-400 hover:underline">Login</Link></li>
+                <li><Link to="/auth" className="transition-all duration-300 hover:text-violet-400 hover:underline">Join Now</Link></li>
               </ul>
             </div>
           </div>
-
-          <div className="mt-12 border-t border-white/10 pt-8 text-center text-base text-gray-500">
+          <div className="mt-8 border-t border-white/10 pt-4 text-center text-base text-gray-500 animate-fadeInUp">
             <p>© 2026 Gyanvatsala Library. All rights reserved.</p>
           </div>
         </div>
       </footer>
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(40px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInUp { animation: fadeInUp 1s cubic-bezier(.4,0,.2,1) both; }
+      `}</style>
     </div>
   )
 }
