@@ -1,9 +1,37 @@
 import { supabase } from '../supabase'
 
-// Use relative paths in development (proxied by Vite)
-// Use full URL only if explicitly set in .env
-const rawApiBase = import.meta.env.VITE_API_BASE_URL || ''
-export const apiBase = rawApiBase.replace(/\/+$/, '')
+function normalizeApiBase(value) {
+  return String(value || '').trim().replace(/\/+$/, '')
+}
+
+function isLocalHostname(hostname) {
+  return hostname === 'localhost' || hostname === '127.0.0.1'
+}
+
+function resolveApiBase() {
+  const configuredApiBase = normalizeApiBase(import.meta.env.VITE_API_BASE_URL)
+  if (!configuredApiBase || typeof window === 'undefined') {
+    return configuredApiBase
+  }
+
+  if (!isLocalHostname(window.location.hostname)) {
+    return configuredApiBase
+  }
+
+  try {
+    const configuredUrl = new URL(configuredApiBase, window.location.origin)
+    if (isLocalHostname(configuredUrl.hostname)) {
+      return configuredApiBase
+    }
+
+    console.warn(`Ignoring remote VITE_API_BASE_URL on localhost: ${configuredApiBase}`)
+    return ''
+  } catch (_) {
+    return configuredApiBase
+  }
+}
+
+export const apiBase = resolveApiBase()
 
 export async function authFetch(path, options = {}) {
   if (!supabase) {

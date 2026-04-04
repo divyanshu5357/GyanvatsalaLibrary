@@ -83,9 +83,9 @@ Notes:
 
 - The backend root URL returns JSON by design because it is API-only.
 - The actual website UI will be on the static site URL created for `gyanvatsala-library-web`.
-- `render.yaml` automatically connects:
-  - frontend `VITE_API_BASE_URL` -> backend public URL
-  - backend `FRONTEND_URL` -> frontend public URL
+- In Render, set:
+  - frontend `VITE_API_BASE_URL` to the backend public URL
+  - backend `FRONTEND_URL` to the frontend public URL
 
 ### Vercel
 
