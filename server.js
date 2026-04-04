@@ -47,29 +47,46 @@ const allowedOrigins = [
   'http://127.0.0.1:4173',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
   'https://gyanvatsala.in',
-  'https://www.gyanvatsala.in'
+  'https://www.gyanvatsala.in',
+  'https://gyanvatsala-library-web.onrender.com',
+  'https://library-app-zkyy.onrender.com'
 ]
 
 // Add Render frontend URL if running on Render
 if (process.env.RENDER === 'true') {
-  const frontendUrl = env.FRONTEND_URL || 'https://gyanvatsala-library-web.onrender.com'
+  const frontendUrl = process.env.FRONTEND_URL || env.FRONTEND_URL || 'https://gyanvatsala-library-web.onrender.com'
   if (frontendUrl && !allowedOrigins.includes(frontendUrl)) {
     allowedOrigins.push(frontendUrl)
   }
 }
 
+console.log('✅ CORS allowed origins:', allowedOrigins)
+
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.includes('onrender.com')) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) {
+      console.log('📡 Request with no origin - allowing')
+      return callback(null, true)
     }
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      console.log(`✅ CORS request from allowed origin: ${origin}`)
+      return callback(null, true)
+    }
+    
+    // Log denied origins for debugging
+    console.warn(`❌ CORS request blocked from origin: ${origin}`)
+    return callback(new Error('CORS not allowed'), false)
   },
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400 // 24 hours
 }))
 app.use(express.json())
 
@@ -118,14 +135,14 @@ app.post('/api/notifications/subscribe', async (req, res) => {
 })
 
 // Get environment variables
-const supabaseUrl = env.VITE_SUPABASE_URL
-const anonKey = env.VITE_SUPABASE_ANON_KEY
-const serviceRoleKey = env.VITE_SUPABASE_SERVICE_ROLE_KEY
-const vapidPublicKey = env.VAPID_PUBLIC_KEY
-const vapidPrivateKey = env.VAPID_PRIVATE_KEY
-const cloudinaryCloudName = env. CLOUDINARY_CLOUD_NAME || env.VITE_CLOUDINARY_CLOUD_NAME
-const cloudinaryApiKey = env.CLOUDINARY_API_KEY
-const cloudinaryApiSecret = env.CLOUDINARY_API_SECRET
+const supabaseUrl = process.env.VITE_SUPABASE_URL
+const anonKey = process.env.VITE_SUPABASE_ANON_KEY
+const serviceRoleKey = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
+const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.VITE_CLOUDINARY_CLOUD_NAME
+const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY
+const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('❌ Error: Missing VITE_SUPABASE_URL or VITE_SUPABASE_SERVICE_ROLE_KEY in .env')
