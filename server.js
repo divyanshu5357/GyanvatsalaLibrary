@@ -5,7 +5,6 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import crypto from 'crypto'
-import webpush from 'web-push'
 
 // Load environment variables from .env file manually
 const __filename = fileURLToPath(import.meta.url)
@@ -90,56 +89,19 @@ app.use(cors({
 }))
 app.use(express.json())
 
-// Public VAPID key for push subscriptions
+// Push notifications endpoints disabled (VAPID keys not configured)
 app.get('/api/notifications/public-key', (_req, res) => {
-  if (!vapidPublicKey) return res.json({ publicKey: null, warning: 'VAPID key missing on server' })
-  return res.json({ publicKey: vapidPublicKey })
+  return res.json({ publicKey: null, message: 'Push notifications not configured' })
 })
 
-// Save push subscription for a user
 app.post('/api/notifications/subscribe', async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization || ''
-    if (!authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authentication required' })
-    }
-
-    const token = authHeader.slice(7).trim()
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid or expired session' })
-    }
-
-    const { subscription } = req.body || {}
-    if (!subscription) return res.status(400).json({ error: 'subscription required' })
-
-    const row = {
-      user_id: user.id,
-      endpoint: subscription.endpoint,
-      p256dh: subscription.keys?.p256dh,
-      auth: subscription.keys?.auth,
-      subscription,
-      updated_at: new Date().toISOString(),
-    }
-
-    const { error } = await supabaseAdmin
-      .from('push_subscriptions')
-      .upsert(row, { onConflict: 'endpoint' })
-
-    if (error) throw error
-    return res.json({ success: true })
-  } catch (err) {
-    console.error('❌ Failed to save subscription:', err.message)
-    return res.status(500).json({ error: 'Failed to save subscription' })
-  }
+  return res.json({ success: true, message: 'Push notifications not configured' })
 })
 
 // Get environment variables
 const supabaseUrl = process.env.VITE_SUPABASE_URL
 const anonKey = process.env.VITE_SUPABASE_ANON_KEY
 const serviceRoleKey = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY
-const vapidPublicKey = process.env.VAPID_PUBLIC_KEY
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
 const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.VITE_CLOUDINARY_CLOUD_NAME
 const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY
 const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET
@@ -152,16 +114,6 @@ if (!supabaseUrl || !serviceRoleKey) {
 
 console.log('✅ Environment loaded from .env')
 console.log('   Supabase URL:', supabaseUrl.substring(0, 30) + '...')
-
-if (vapidPublicKey && vapidPrivateKey) {
-  webpush.setVapidDetails('mailto:admin@smartstudy.local', vapidPublicKey, vapidPrivateKey)
-}
-// VAPID keys are optional - web push disabled if not configured
-// if (vapidPublicKey && vapidPrivateKey) {
-//   webpush.setVapidDetails('mailto:admin@smartstudy.local', vapidPublicKey, vapidPrivateKey)
-// } else {
-//   console.warn('⚠️ VAPID keys missing. Web push will be disabled. Add VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to .env')
-// }
 
 // Initialize admin client with SERVICE_ROLE_KEY
 const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
@@ -542,43 +494,13 @@ async function upsertNotificationRows(rows = []) {
   }
 }
 
+// Push notifications disabled - stub functions for compatibility
 async function getSubscriptionsForUsers(userIds = []) {
-  if (!userIds.length) return []
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('push_subscriptions')
-      .select('*')
-      .in('user_id', userIds)
-    if (error) throw error
-    return data || []
-  } catch (err) {
-    console.warn('⚠️ Fetch subscriptions failed:', err.message)
-    return []
-  }
+  return []
 }
 
 async function sendPushToUsers(userIds = [], payload = {}) {
-  if (!vapidPublicKey || !vapidPrivateKey) return
-  const subs = await getSubscriptionsForUsers(userIds)
-  const jsonPayload = JSON.stringify({
-    title: 'Smart Study Room',
-    body: payload.message || 'You have a new notification.',
-    type: payload.type || 'info',
-  })
-
-  await Promise.all(subs.map(async (sub) => {
-    try {
-      await webpush.sendNotification(sub.subscription, jsonPayload)
-    } catch (err) {
-      // Clean up stale subscriptions
-      if (err.statusCode === 404 || err.statusCode === 410) {
-        try {
-          await supabaseAdmin.from('push_subscriptions').delete().eq('id', sub.id)
-        } catch (_) {}
-      }
-      console.warn('⚠️ Push send failed:', err.message)
-    }
-  }))
+  // Push notifications disabled
 }
 
 /**
