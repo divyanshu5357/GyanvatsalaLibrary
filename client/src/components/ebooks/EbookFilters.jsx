@@ -31,7 +31,7 @@ export default function EbookFilters({
   }
 
   return (
-    <div className="glass rounded-2xl p-4 border border-slate-700/60 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+    <div className="card-hover glass rounded-2xl p-4 border border-slate-700/60 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
       <input
         value={search}
         onChange={(event) => setSearch(event.target.value)}

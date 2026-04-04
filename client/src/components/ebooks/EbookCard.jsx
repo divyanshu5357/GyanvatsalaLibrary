@@ -10,7 +10,7 @@ export default function EbookCard({ ebook, onRead, onEdit, onDelete, showActions
 
   return (
     <article
-      className="glass rounded-2xl p-4 border border-slate-700/60 hover:border-indigo-400/50 hover:shadow-xl hover:shadow-indigo-500/10 transition animate-slideInUp"
+      className="card-hover glass rounded-2xl p-4 border border-slate-700/60 hover:border-indigo-400/50 hover:shadow-xl hover:shadow-indigo-500/10 transition animate-slideInUp"
       style={{ animationDelay: `${animationDelay}ms` }}
     >
       <div className="rounded-xl overflow-hidden bg-slate-800 mb-3 aspect-[16/10]">

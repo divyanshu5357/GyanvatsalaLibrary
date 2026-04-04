@@ -94,7 +94,7 @@ export default function AuthPage() {
             </div>
 
             {/* Don't have credentials box */}
-            <div className="p-5 rounded-lg bg-red-900/30 border border-red-500/40">
+            <div className="card-hover p-5 rounded-lg bg-red-900/30 border border-red-500/40">
               <div className="flex gap-3">
                 <div className="text-2xl">⚠️</div>
                 <div>
@@ -111,7 +111,7 @@ export default function AuthPage() {
 
           {/* Right Side - Login Form */}
           <div className="flex items-center justify-center lg:justify-start">
-            <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
+            <div className="card-hover w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
               <h2 className="text-3xl font-bold text-white mb-2">Login</h2>
               <p className="text-slate-200 text-sm mb-6">Enter your credentials to access your dashboard</p>
 
@@ -183,21 +183,21 @@ export default function AuthPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* New User */}
-            <div className="p-6 rounded-lg bg-white/5 border border-white/10 hover:border-purple-500/50 transition">
+            <div className="card-hover p-6 rounded-lg bg-white/5 border border-white/10 hover:border-purple-500/50 transition">
               <div className="text-3xl mb-3">🎯</div>
               <h4 className="font-bold text-white text-lg mb-2">New User?</h4>
               <p className="text-slate-300 text-sm">Request account credentials from the admin to get started with your learning journey.</p>
             </div>
 
             {/* Forgot Password */}
-            <div className="p-6 rounded-lg bg-white/5 border border-white/10 hover:border-pink-500/50 transition">
+            <div className="card-hover p-6 rounded-lg bg-white/5 border border-white/10 hover:border-pink-500/50 transition">
               <div className="text-3xl mb-3">🔑</div>
               <h4 className="font-bold text-white text-lg mb-2">Forgot Password?</h4>
               <p className="text-slate-300 text-sm">Use password recovery option or contact admin for account recovery assistance.</p>
             </div>
 
             {/* Need Assistance */}
-            <div className="p-6 rounded-lg bg-white/5 border border-white/10 hover:border-indigo-500/50 transition">
+            <div className="card-hover p-6 rounded-lg bg-white/5 border border-white/10 hover:border-indigo-500/50 transition">
               <div className="text-3xl mb-3">❓</div>
               <h4 className="font-bold text-white text-lg mb-2">Need Assistance?</h4>
               <p className="text-slate-300 text-sm">Email admin@gyanvatsala.com for support and we'll help you get started.</p>

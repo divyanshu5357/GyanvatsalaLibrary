@@ -13,7 +13,7 @@ function FolderNode({ node, depth = 0, onRead, onEdit, onDelete, showActions = f
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className={`w-full text-left rounded-2xl border transition ${
+        className={`card-hover w-full text-left rounded-2xl border transition ${
           depth === 0
             ? 'bg-slate-900/50 border-slate-700/80 px-4 py-4 hover:border-indigo-400/50'
             : 'bg-slate-900/35 border-slate-700/60 px-3 py-3 hover:border-slate-500/70'

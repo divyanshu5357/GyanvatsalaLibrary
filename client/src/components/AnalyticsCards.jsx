@@ -25,7 +25,7 @@ export function DefaultersList({ students = [] }) {
       {defaulters.map(student => {
         const daysOverdue = Math.floor((new Date() - new Date(student.fee_due_date || student.next_due)) / (1000 * 60 * 60 * 24))
         return (
-          <div key={student.id} className="p-4 bg-red-500/10 border border-red-400/50 rounded-lg animate-slideInUp">
+          <div key={student.id} className="card-hover p-4 bg-red-500/10 border border-red-400/50 rounded-lg animate-slideInUp">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-semibold text-white">{student.user?.name}</h4>
@@ -72,7 +72,7 @@ export function DueSoonList({ students = [] }) {
       {dueSoon.map(student => {
         const daysUntilDue = Math.ceil((new Date(student.fee_due_date || student.next_due) - today) / (1000 * 60 * 60 * 24))
         return (
-          <div key={student.id} className="p-4 bg-amber-500/10 border border-amber-400/50 rounded-lg animate-slideInUp">
+          <div key={student.id} className="card-hover p-4 bg-amber-500/10 border border-amber-400/50 rounded-lg animate-slideInUp">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-semibold text-white">{student.user?.name}</h4>
@@ -105,7 +105,7 @@ export function MonthlyEarnings({ students = [] }) {
   }, 0)
 
   return (
-    <div className="bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg p-6 shadow-lg">
+    <div className="card-hover bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg p-6 shadow-lg">
       <div className="text-emerald-100 text-sm font-medium mb-2">Monthly Earnings</div>
       <div className="text-4xl font-bold text-white">₹{monthlyEarnings.toLocaleString()}</div>
       <div className="text-emerald-200 text-xs mt-2">
@@ -138,19 +138,19 @@ export function AnalyticsOverview({ students = [] }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div className="glass rounded-lg p-4 border-l-4 border-indigo-500">
+      <div className="card-hover glass rounded-lg p-4 border-l-4 border-indigo-500">
         <div className="text-xs text-slate-400 mb-1">Total Students</div>
         <div className="text-3xl font-bold text-indigo-300">{stats.totalStudents}</div>
       </div>
-      <div className="glass rounded-lg p-4 border-l-4 border-emerald-500">
+      <div className="card-hover glass rounded-lg p-4 border-l-4 border-emerald-500">
         <div className="text-xs text-slate-400 mb-1">Fees Paid</div>
         <div className="text-3xl font-bold text-emerald-300">{stats.paidFees}</div>
       </div>
-      <div className="glass rounded-lg p-4 border-l-4 border-red-500">
+      <div className="card-hover glass rounded-lg p-4 border-l-4 border-red-500">
         <div className="text-xs text-slate-400 mb-1">Overdue</div>
         <div className="text-3xl font-bold text-red-300">{stats.overdue}</div>
       </div>
-      <div className="glass rounded-lg p-4 border-l-4 border-amber-500">
+      <div className="card-hover glass rounded-lg p-4 border-l-4 border-amber-500">
         <div className="text-xs text-slate-400 mb-1">Due Soon</div>
         <div className="text-3xl font-bold text-amber-300">{stats.dueSoon}</div>
       </div>

@@ -175,47 +175,47 @@ export default function AdminDashboard() {
           {(isStudents) && (
             <>
               <section className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="glass p-4 rounded">
+                <div className="card-hover glass p-4 rounded">
                   <div className="text-sm text-slate-400">Total Students</div>
                   <div className="text-2xl font-bold">{metrics.totalStudents ?? 0}</div>
                 </div>
-                <div className="glass p-4 rounded">
+                <div className="card-hover glass p-4 rounded">
                   <div className="text-sm text-slate-400">Total Seats</div>
                   <div className="text-2xl font-bold">{metrics.totalSeats ?? 0}</div>
                 </div>
-                <div className="glass p-4 rounded">
+                <div className="card-hover glass p-4 rounded">
                   <div className="text-sm text-slate-400">Occupied Seats</div>
                   <div className="text-2xl font-bold">{metrics.occupiedSeats ?? 0}</div>
                 </div>
-                <div className="glass p-4 rounded">
+                <div className="card-hover glass p-4 rounded">
                   <div className="text-sm text-slate-400">Pending Fees</div>
                   <div className={`text-2xl font-bold ${metrics.pendingFees > 0 ? 'text-amber-300' : ''}`}>{metrics.pendingFees ?? 0}</div>
                 </div>
               </section>
 
-              <section className="mt-8 glass rounded">
+              <section className="card-hover mt-8 glass rounded">
                 <StudentsList key={refreshKey} onMetrics={handleMetrics} />
               </section>
             </>
           )}
 
           {isSeats && (
-            <section className="mt-8 glass rounded p-6 space-y-3">
+            <section className="card-hover mt-8 glass rounded p-6 space-y-3">
               <h2 className="text-xl font-semibold">Seats</h2>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div className="p-4 rounded bg-slate-800/40">
+                <div className="card-hover p-4 rounded bg-slate-800/40">
                   <div className="text-sm text-slate-400">Total seats</div>
                   <div className="text-2xl font-bold">{(totalSeatsOverride ?? metrics.totalSeats) ?? 0}</div>
                 </div>
-                <div className="p-4 rounded bg-slate-800/40">
+                <div className="card-hover p-4 rounded bg-slate-800/40">
                   <div className="text-sm text-slate-400">Occupied</div>
                   <div className="text-2xl font-bold">{metrics.occupiedSeats ?? 0}</div>
                 </div>
-                <div className="p-4 rounded bg-slate-800/40">
+                <div className="card-hover p-4 rounded bg-slate-800/40">
                   <div className="text-sm text-slate-400">Vacant</div>
                   <div className="text-2xl font-bold">{Math.max(0, (totalSeatsOverride ?? metrics.totalSeats) - (metrics.occupiedSeats ?? 0))}</div>
                 </div>
-                <div className="p-4 rounded bg-slate-800/40">
+                <div className="card-hover p-4 rounded bg-slate-800/40">
                   <div className="text-sm text-slate-400">Editable</div>
                   <div className="flex gap-2 mt-2">
                     <input value={seatsInput} onChange={(e) => setSeatsInput(e.target.value)} className="w-28 p-2 rounded bg-transparent border text-white text-sm" placeholder="e.g. 50" />
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
           )}
 
           {isFees && (
-            <section className="mt-8 glass rounded p-6 space-y-3">
+            <section className="card-hover mt-8 glass rounded p-6 space-y-3">
               <h2 className="text-xl font-semibold">Fees</h2>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <p className="text-slate-300 max-w-xl">Filter students by fee status to quickly find who has paid, who has upcoming dues, and who is overdue.</p>

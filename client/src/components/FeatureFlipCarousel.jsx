@@ -36,7 +36,7 @@ export default function FeatureFlipCarousel({ features, cardsPerSlide = 3, autoS
           return (
             <div
               key={feature.title}
-              className="group [perspective:1000px] w-72 h-72 cursor-pointer"
+              className="card-hover group [perspective:1000px] w-72 h-72 cursor-pointer"
               onMouseEnter={() => handleFlip(idx)}
               onMouseLeave={() => handleFlip(idx)}
             >

@@ -69,7 +69,7 @@ const reasonsToJoin = [
     body: 'A structured library setting reduces noise and helps you spend more time in deep work.',
   },
   {
-    icon: '🌱',
+    icon: '🗓️',
     title: 'Builds consistency',
     body: 'Showing up to the same study space every day creates momentum and stronger long-term discipline.',
   },
@@ -83,7 +83,7 @@ const reasonsToJoin = [
 // Library Features Section Data
 const libraryFeatures = [
   {
-    icon: '🧠',
+    icon: '🎯',
     title: 'Study-Friendly Environment',
     body: 'A calm and distraction-free space designed to improve focus and productivity.',
   },
@@ -103,7 +103,7 @@ const libraryFeatures = [
     body: 'Comfortable air-conditioned rooms to ensure a pleasant study experience.',
   },
   {
-    icon: '🪑',
+    icon: '⏳',
     title: 'Limited Seating (Only 40 Seats)',
     body: 'Limited seats to maintain discipline, reduce noise, and enhance concentration.',
   },
@@ -171,25 +171,30 @@ export default function Landing() {
 
   return (
     <div id="top" className="min-h-screen overflow-hidden bg-black text-white">
-      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/40 px-6 py-4 backdrop-blur-md">
-        <div className="mx-auto flex flex-col sm:flex-row max-w-7xl items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2 mb-2 sm:mb-0">
-            <img src="/image/logo.svg" alt="Gyanvatsala" className="h-8 w-8" />
-            <span className="text-2xl font-bold tracking-tight hidden sm:inline">Gyanvatsala Library</span>
-            <span className="text-2xl font-bold tracking-tight sm:hidden">Gyanvatsala</span>
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/45 px-4 py-4 backdrop-blur-md sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 sm:gap-4">
+          <Link
+            to="/"
+            className="group flex min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition-all duration-300 hover:border-cyan-400/35 hover:bg-white/[0.06]"
+          >
+            <img
+              src="/image/logo.svg"
+              alt="Gyanvatsala"
+              className="h-10 w-10 rounded-xl transition-transform duration-300 group-hover:scale-105"
+            />
+            <span className="truncate text-xl font-bold tracking-tight sm:text-2xl hidden sm:inline">Gyanvatsala Library</span>
+            <span className="truncate text-xl font-bold tracking-tight sm:hidden">Gyanvatsala</span>
           </Link>
           <Link
             to="/auth"
-            className="rounded-xl border border-white/10 bg-white/10 px-6 py-3 text-lg font-semibold transition hover:bg-white/15 w-full sm:w-auto text-center"
+            className="inline-flex shrink-0 min-w-[120px] items-center justify-center rounded-2xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 via-sky-500/15 to-blue-500/20 px-5 py-3 text-base font-semibold text-white shadow-[0_14px_32px_-20px_rgba(34,211,238,0.95)] transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/60 hover:from-cyan-500/30 hover:via-sky-500/30 hover:to-blue-500/35 hover:shadow-[0_18px_36px_-18px_rgba(56,189,248,0.95)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 sm:min-w-[160px] sm:px-6"
           >
-            Login / Get Started
+            Login
           </Link>
         </div>
       </nav>
-      {/* Spacer for fixed navbar on mobile */}
-      <div className="block sm:hidden" style={{ height: '90px' }} />
 
-      <section className="bg-gradient-to-br from-[#05081c] via-[#17123b] to-[#3a1250] px-4 pb-16 pt-28 sm:px-6 sm:pb-24">
+      <section className="bg-gradient-to-br from-[#05081c] via-[#17123b] to-[#3a1250] px-4 pb-16 pt-24 sm:px-6 sm:pb-24 sm:pt-28">
         <div className="mx-auto max-w-6xl">
           <div
             className="relative min-h-[600px] sm:min-h-[700px] flex items-center justify-center overflow-hidden rounded-[2rem] shadow-2xl"
@@ -231,40 +236,23 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="bg-slate-950 px-4 py-20 sm:px-6">
-        <div className="mx-auto max-w-5xl text-center">
-          <p className="min-h-20 text-4xl font-bold leading-relaxed text-gray-100 md:text-5xl">
+      <section className="bg-slate-950 px-4 pb-8 pt-12 sm:px-6 sm:pb-10 sm:pt-14">
+        <div className="mx-auto max-w-[1500px] text-center">
+          <p className="min-h-0 text-xl font-bold leading-tight tracking-tight text-gray-100 sm:text-2xl md:text-[1.9rem] lg:whitespace-nowrap lg:text-[2.1rem] xl:text-[2.3rem]">
             <span className="text-slate-300">"</span>{' '}
             <TypingQuote key={quoteKey} quote={quotes[currentQuoteIndex]} speed={40} />
             <span className="text-slate-300">"</span>
             <span className="ml-2 animate-pulse text-slate-300">|</span>
           </p>
-
-          <div className="mt-12 flex justify-center gap-3">
-            {quotes.map((quote, index) => (
-              <button
-                key={quote}
-                type="button"
-                onClick={() => {
-                  setCurrentQuoteIndex(index)
-                  setQuoteKey((prev) => prev + 1)
-                }}
-                className={`h-3 w-3 rounded-full transition ${
-                  index === currentQuoteIndex ? 'scale-150 bg-yellow-400' : 'bg-gray-600 hover:bg-gray-500'
-                }`}
-                aria-label={`Show quote ${index + 1}`}
-              />
-            ))}
-          </div>
         </div>
       </section>
 
 
-      <section id="featured-books" className="bg-[#0a0a0a] px-4 py-20 sm:px-6">
+      <section id="featured-books" className="bg-[#0a0a0a] px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-12">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-12">
+          <div className="mb-10 text-center">
             <h2 className="text-4xl font-bold md:text-5xl">Featured Books</h2>
-            <p className="mt-2 text-lg text-gray-400">
+            <p className="mx-auto mt-2 max-w-3xl text-lg text-gray-400">
               A glimpse of the kind of reading that keeps your mind active and your routine meaningful.
             </p>
           </div>
@@ -272,7 +260,7 @@ export default function Landing() {
           {/* Responsive Book Slider for Mobile, Grid for Desktop */}
           <div className="block sm:hidden">
             <MobileSlider items={bookCovers} renderItem={(book) => (
-              <article key={book.title} className="group relative cursor-pointer w-64 mx-auto">
+              <article key={book.title} className="card-hover group relative cursor-pointer w-64 mx-auto">
                 <div className="aspect-[9/13] overflow-hidden rounded-lg bg-gray-800 shadow-2xl transition-all duration-300 group-hover:-translate-y-3 group-hover:scale-105">
                   <img
                     src={book.image}
@@ -289,9 +277,9 @@ export default function Landing() {
               </article>
             )} />
           </div>
-          <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="hidden justify-items-center gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {bookCovers.map((book) => (
-              <article key={book.title} className="group relative cursor-pointer">
+              <article key={book.title} className="card-hover group relative w-full max-w-[210px] cursor-pointer">
                 <div className="aspect-[9/13] overflow-hidden rounded-lg bg-gray-800 shadow-2xl transition-all duration-300 group-hover:-translate-y-3 group-hover:scale-105">
                   <img
                     src={book.image}
@@ -328,7 +316,7 @@ export default function Landing() {
               autoSlideInterval={1000}
               renderItem={(feature, idx) => (
                 <div
-                  className="group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
+                  className="card-hover group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
                   onClick={e => e.currentTarget.classList.toggle('flipped')}
                 >
                   <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
@@ -363,7 +351,7 @@ export default function Landing() {
               autoSlideInterval={1000}
               renderItem={(item, idx) => (
                 <div
-                  className="group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
+                className="card-hover group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
                   onClick={e => e.currentTarget.classList.toggle('flipped')}
                 >
                   <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
@@ -386,7 +374,7 @@ export default function Landing() {
             {advantages.map((item, idx) => (
               <div
                 key={item.title}
-                className="group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
+                className="card-hover group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
                 onMouseEnter={e => e.currentTarget.classList.add('flipped')}
                 onMouseLeave={e => e.currentTarget.classList.remove('flipped')}
               >
@@ -417,7 +405,7 @@ export default function Landing() {
               autoSlideInterval={2000}
               renderItem={(item, idx) => (
                 <div
-                  className="group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
+                className="card-hover group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
                   onClick={e => e.currentTarget.classList.toggle('flipped')}
                 >
                   <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
@@ -440,7 +428,7 @@ export default function Landing() {
             {reasonsToJoin.map((item, idx) => (
               <div
                 key={item.title}
-                className="group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
+                className="card-hover group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
                 onMouseEnter={e => e.currentTarget.classList.add('flipped')}
                 onMouseLeave={e => e.currentTarget.classList.remove('flipped')}
               >
@@ -479,11 +467,11 @@ export default function Landing() {
       <footer className="border-t border-white/10 bg-black px-6 pt-12 pb-4 animate-fadeInUp">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+            <div className="card-hover transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
               <h3 className="text-2xl font-bold transition-colors duration-300 hover:text-violet-400">Gyanvatsala Library</h3>
               <p className="mt-4 text-base text-gray-400">A disciplined reading and study space for students who want stronger habits and better focus.</p>
             </div>
-            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+            <div className="card-hover transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
               <h4 className="mb-6 text-lg font-bold transition-colors duration-300 hover:text-violet-400">Explore</h4>
               <ul className="space-y-3 text-gray-400">
                 <li><a href="#featured-books" className="transition-all duration-300 hover:text-violet-400 hover:underline">Featured Books</a></li>
@@ -491,7 +479,7 @@ export default function Landing() {
                 <li><a href="#top" className="transition-all duration-300 hover:text-violet-400 hover:underline">Back to Top</a></li>
               </ul>
             </div>
-            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+            <div className="card-hover transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
               <h4 className="mb-6 text-lg font-bold transition-colors duration-300 hover:text-violet-400">For Visitors</h4>
               <ul className="space-y-3 text-gray-400">
                 <li className="transition-all duration-300 hover:text-violet-400">Peaceful study atmosphere</li>
@@ -499,7 +487,7 @@ export default function Landing() {
                 <li className="transition-all duration-300 hover:text-violet-400">Disciplined daily routine</li>
               </ul>
             </div>
-            <div className="transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
+            <div className="card-hover transition-all duration-300 hover:scale-105 hover:bg-white/5 rounded-xl p-2">
               <h4 className="mb-6 text-lg font-bold transition-colors duration-300 hover:text-violet-400">Start</h4>
               <ul className="space-y-3 text-gray-400">
                 <li><Link to="/auth" className="transition-all duration-300 hover:text-violet-400 hover:underline">Login</Link></li>

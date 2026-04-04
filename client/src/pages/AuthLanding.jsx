@@ -61,7 +61,7 @@ export default function AuthLanding() {
           </div>
 
           {/* CTA for no credentials */}
-          <div className="space-y-4 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-lg p-6">
+          <div className="card-hover space-y-4 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-lg p-6">
             <div className="flex items-start gap-3">
               <span className="text-2xl mt-1">⚠️</span>
               <div>
@@ -88,7 +88,7 @@ export default function AuthLanding() {
 
         {/* Right Section - Info Box */}
         <div className="flex items-center justify-center">
-          <div className="glass backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 space-y-6 max-w-md w-full shadow-2xl">
+          <div className="card-hover glass backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 space-y-6 max-w-md w-full shadow-2xl">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-white mb-2">Login to Your Account</h2>
               <p className="text-slate-300 text-sm">
@@ -96,7 +96,7 @@ export default function AuthLanding() {
               </p>
             </div>
 
-            <div className="space-y-4 bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="card-hover space-y-4 bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-start gap-3">
                 <span className="text-lg mt-0.5">👤</span>
                 <div>
@@ -145,7 +145,7 @@ export default function AuthLanding() {
 
       {/* Bottom section - Additional info */}
       <div className="w-full max-w-7xl mt-16 relative z-10">
-        <div className="bg-gradient-to-r from-slate-800/50 to-purple-900/50 border border-slate-700/50 rounded-xl p-8">
+        <div className="card-hover bg-gradient-to-r from-slate-800/50 to-purple-900/50 border border-slate-700/50 rounded-xl p-8">
           <h3 className="text-2xl font-bold text-white mb-4">Quick Access</h3>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="flex items-start gap-3">

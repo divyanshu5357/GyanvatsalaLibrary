@@ -327,7 +327,7 @@ export default function AdminEbookManager() {
 
   return (
     <section className="space-y-5">
-      <div className="glass rounded-2xl p-4 border border-slate-700/60 space-y-4">
+      <div className="card-hover glass rounded-2xl p-4 border border-slate-700/60 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold">Manage Study Materials</h2>
@@ -353,15 +353,15 @@ export default function AdminEbookManager() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="rounded-xl border border-slate-700/70 bg-slate-900/40 px-4 py-3">
+          <div className="card-hover rounded-xl border border-slate-700/70 bg-slate-900/40 px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-slate-400">Total Books</p>
             <p className="text-2xl font-semibold mt-1">{stats.total}</p>
           </div>
-          <div className="rounded-xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-3">
+          <div className="card-hover rounded-xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-indigo-200">School</p>
             <p className="text-2xl font-semibold mt-1">{stats.school}</p>
           </div>
-          <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3">
+          <div className="card-hover rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-emerald-200">Other Study Materials</p>
             <p className="text-2xl font-semibold mt-1">{stats.other}</p>
           </div>
@@ -548,11 +548,11 @@ export default function AdminEbookManager() {
       {loading && <EbookSkeletonGrid count={6} />}
 
       {!loading && error && (
-        <div className="glass rounded-xl p-4 border border-red-500/50 text-red-200">{error}</div>
+        <div className="card-hover glass rounded-xl p-4 border border-red-500/50 text-red-200">{error}</div>
       )}
 
       {!loading && !error && filteredEbooks.length === 0 && (
-        <div className="glass rounded-xl p-6 text-slate-300 text-center">No study materials found for the current filters.</div>
+        <div className="card-hover glass rounded-xl p-6 text-slate-300 text-center">No study materials found for the current filters.</div>
       )}
 
       {!loading && !error && filteredEbooks.length > 0 && viewMode === 'card' && (
@@ -566,7 +566,7 @@ export default function AdminEbookManager() {
       )}
 
       {!loading && !error && filteredEbooks.length > 0 && viewMode === 'table' && (
-        <div className="glass rounded-xl overflow-x-auto border border-slate-700/60">
+        <div className="card-hover glass rounded-xl overflow-x-auto border border-slate-700/60">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-700 bg-slate-900/60">

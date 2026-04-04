@@ -48,7 +48,7 @@ export default function Notifications() {
               {items.map((n, idx) => {
                 const isOverdue = n.status === 'overdue'
                 return (
-                  <div key={idx} className={`glass p-4 rounded border ${isOverdue ? 'border-red-500/50' : 'border-amber-400/40'} flex items-start gap-3`}>
+                  <div key={idx} className={`card-hover glass p-4 rounded border ${isOverdue ? 'border-red-500/50' : 'border-amber-400/40'} flex items-start gap-3`}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isOverdue ? 'bg-red-600/30 text-red-100' : 'bg-amber-500/30 text-amber-100'}`}>
                       {isOverdue ? '⚠️' : '⏰'}
                     </div>

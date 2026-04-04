@@ -275,7 +275,7 @@ export default function StudentDashboard() {
           </aside>
 
           <section>
-            <div className="glass rounded-2xl p-4 sm:p-5 mb-4">
+            <div className="card-hover glass rounded-2xl p-4 sm:p-5 mb-4">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 shrink-0">
                   <img src={displayAvatar} alt={profile?.name || 'avatar'} className="w-full h-full object-cover" />
@@ -295,28 +295,28 @@ export default function StudentDashboard() {
                 {activeSection === 'overview' && (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="glass rounded-xl p-4">
+                      <div className="card-hover glass rounded-xl p-4">
                         <p className="text-xs uppercase text-slate-400 tracking-wide">Seat Number</p>
                         <p className="text-2xl font-bold mt-1">{student.seat_number || '—'}</p>
                       </div>
-                      <div className="glass rounded-xl p-4">
+                      <div className="card-hover glass rounded-xl p-4">
                         <p className="text-xs uppercase text-slate-400 tracking-wide">Fee Status</p>
                         <p className={`text-2xl font-bold mt-1 ${feeStatusTone}`}>{feeStatus}</p>
                       </div>
                     </div>
 
-                    <div className="glass rounded-xl p-4 space-y-3">
+                    <div className="card-hover glass rounded-xl p-4 space-y-3">
                       <h3 className="text-lg font-semibold">Fee Summary</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="rounded-lg bg-slate-800/70 border border-slate-700 p-3">
+                        <div className="card-hover rounded-lg bg-slate-800/70 border border-slate-700 p-3">
                           <p className="text-xs uppercase tracking-wide text-slate-400">Fee Amount</p>
                           <p className="text-xl font-semibold mt-1">{student.fee_amount ? `₹${student.fee_amount}` : '—'}</p>
                         </div>
-                        <div className="rounded-lg bg-slate-800/70 border border-slate-700 p-3">
+                        <div className="card-hover rounded-lg bg-slate-800/70 border border-slate-700 p-3">
                           <p className="text-xs uppercase tracking-wide text-slate-400">Due Date</p>
                           <p className="text-xl font-semibold mt-1">{formatDate(feeDueDate)}</p>
                         </div>
-                        <div className="rounded-lg bg-slate-800/70 border border-slate-700 p-3 sm:col-span-2">
+                        <div className="card-hover rounded-lg bg-slate-800/70 border border-slate-700 p-3 sm:col-span-2">
                           <p className="text-xs uppercase tracking-wide text-slate-400">Paid On</p>
                           <p className="text-xl font-semibold mt-1">{formatDate(feePaidDate, 'Not paid yet')}</p>
                         </div>
@@ -327,11 +327,11 @@ export default function StudentDashboard() {
 
                 {activeSection === 'account' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="glass p-4 rounded-xl space-y-3">
+                    <div className="card-hover glass p-4 rounded-xl space-y-3">
                       {detail('Name', student.user?.name || profile?.name || '—')}
                       {detail('Email', student.user?.email || currentUser?.email || '—', true)}
                     </div>
-                    <div className="glass p-4 rounded-xl space-y-3">
+                    <div className="card-hover glass p-4 rounded-xl space-y-3">
                       {detail('Seat Number (locked)', student.seat_number || '—')}
                       <p className="text-xs text-amber-300">Seat number can only be changed by admin.</p>
                       {detail('Joined On', formatDate(student.join_date))}
@@ -341,7 +341,7 @@ export default function StudentDashboard() {
 
                 {activeSection === 'ebooks' && (
                   <div className="space-y-4">
-                    <div className="glass rounded-xl p-4 border border-slate-700/60">
+                    <div className="card-hover glass rounded-xl p-4 border border-slate-700/60">
                       <h3 className="text-lg font-semibold">Study Materials</h3>
                       <p className="text-sm text-slate-400 mt-1">Navigate a folder-style library for school books, notes, PYQs, and custom learning resources.</p>
                     </div>
@@ -379,7 +379,7 @@ export default function StudentDashboard() {
                 )}
 
                 {activeSection === 'avatar' && (
-                  <div className="glass p-4 rounded-xl space-y-4">
+                  <div className="card-hover glass p-4 rounded-xl space-y-4">
                     <h3 className="text-lg font-semibold">Profile Picture</h3>
                     <div className="flex items-center gap-3">
                       <div className="w-16 h-16 rounded-full overflow-hidden border border-slate-700 bg-slate-800">
@@ -407,7 +407,7 @@ export default function StudentDashboard() {
                 )}
 
                 {activeSection === 'security' && (
-                  <div className="glass p-4 rounded-xl space-y-3">
+                  <div className="card-hover glass p-4 rounded-xl space-y-3">
                     <h3 className="text-lg font-semibold">Change Password</h3>
                     <form onSubmit={handlePasswordChange} className="space-y-2">
                       <input

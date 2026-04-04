@@ -71,6 +71,51 @@ body {
   border: 1px solid rgba(255,255,255,0.08);
 }
 
+.card-hover {
+  position: relative;
+  isolation: isolate;
+  will-change: transform, box-shadow;
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 260ms ease,
+    border-color 260ms ease,
+    background-color 260ms ease;
+}
+
+.card-hover::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -14px;
+  height: 24px;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at center,
+      rgba(103, 232, 249, 0.24) 0%,
+      rgba(96, 165, 250, 0.18) 30%,
+      rgba(59, 130, 246, 0.08) 55%,
+      rgba(15, 23, 42, 0) 78%);
+  filter: blur(14px);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 260ms ease, transform 260ms ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 26px 50px -28px rgba(56, 189, 248, 0.45),
+    0 14px 30px -24px rgba(15, 23, 42, 0.9);
+}
+
+.card-hover:hover::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Enhanced animations */
 @keyframes slideInUp {
   from {
@@ -165,4 +210,15 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover,
+  .card-hover::after {
+    transition: none;
+  }
+
+  .card-hover:hover {
+    transform: none;
+  }
 }
