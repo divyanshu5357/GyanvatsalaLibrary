@@ -49,20 +49,8 @@ export function NotificationProvider({ children }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const askedRef = useRef(false)
   const seenIdsRef = useRef(new Set())
-  const [vapidKey, setVapidKey] = useState(null)
 
   const role = profile?.role
-
-  const urlBase64ToUint8Array = (base64String) => {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-    const rawData = atob(base64)
-    const outputArray = new Uint8Array(rawData.length)
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i)
-    }
-    return outputArray
-  }
 
   const requestPermissionIfNeeded = async () => {
     if (askedRef.current) return
@@ -166,47 +154,6 @@ export function NotificationProvider({ children }) {
       navigator.serviceWorker.register('/sw.js').catch(err => console.warn('SW register failed', err))
     }
   }, [])
-
-  // Get public VAPID key
-  useEffect(() => {
-    const fetchKey = async () => {
-      try {
-        const res = await fetch(`${apiBase}/api/notifications/public-key`)
-        if (!res.ok) return
-        const data = await res.json()
-        setVapidKey(data.publicKey || null)
-      } catch (err) {
-        console.warn('Failed to load VAPID key', err.message)
-      }
-    }
-    fetchKey()
-  }, [])
-
-  // Register push subscription with backend
-  useEffect(() => {
-    const subscribe = async () => {
-      if (!currentUser || Notification.permission !== 'granted' || !vapidKey) return
-      if (!('serviceWorker' in navigator)) return
-      try {
-        const reg = await navigator.serviceWorker.ready
-        let sub = await reg.pushManager.getSubscription()
-        if (!sub) {
-          sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(vapidKey),
-          })
-        }
-
-        await authFetch('/api/notifications/subscribe', {
-          method: 'POST',
-          body: JSON.stringify({ subscription: sub }),
-        })
-      } catch (err) {
-        console.warn('Push subscribe failed', err.message)
-      }
-    }
-    subscribe()
-  }, [currentUser, vapidKey])
 
   const markAllRead = () => setItems(prev => prev.map(n => ({ ...n, read: true })))
 
