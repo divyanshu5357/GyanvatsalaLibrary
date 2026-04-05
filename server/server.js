@@ -847,29 +847,42 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
     if (!ebook.file_url) return res.status(400).json({ error: 'Ebook file URL is missing' })
 
     console.log('📥 Proxying PDF:', ebook.title)
-    console.log('   Original URL:', ebook.file_url)
 
     let pdfUrl = ebook.file_url
 
-    // For Cloudinary PDFs, reconstruct clean URL from public_id
-    if (ebook.upload_type === 'cloudinary' && ebook.file_public_id) {
-      try {
-        // Build clean URL: https://res.cloudinary.com/{cloud}/raw/upload/{public_id}
-        pdfUrl = `https://res.cloudinary.com/dghcsoc48/raw/upload/${ebook.file_public_id}`
-        console.log('   Reconstructed URL:', pdfUrl)
-      } catch (err) {
-        console.log('   Using original URL')
+    // For Cloudinary PDFs, build clean URL
+    if (ebook.upload_type === 'cloudinary') {
+      let publicId = ebook.file_public_id
+      
+      // If no stored public_id, try to extract from URL
+      if (!publicId && pdfUrl.includes('cloudinary.com')) {
+        try {
+          const urlObj = new URL(pdfUrl)
+          const pathname = urlObj.pathname // e.g., /dghcsoc48/raw/upload/v1775371684/library-management/ebooks/pdfs/zwecylls06earodqai
+          const parts = pathname.split('/upload/')
+          if (parts[1]) {
+            publicId = parts[1] // Gets: v1775371684/library-management/ebooks/pdfs/zwecylls06earodqai
+            console.log('   Extracted public_id:', publicId)
+          }
+        } catch (e) {
+          console.log('   Could not extract public_id from URL')
+        }
+      }
+
+      if (publicId) {
+        pdfUrl = `https://res.cloudinary.com/dghcsoc48/raw/upload/${publicId}`
+        console.log('   Using:', pdfUrl)
       }
     }
 
+    console.log('   Fetching...')
     const fetchRes = await fetch(pdfUrl, {
       method: 'GET',
       headers: { 'User-Agent': 'Mozilla/5.0' }
     })
 
     if (!fetchRes.ok) {
-      console.error(`❌ Fetch failed: ${fetchRes.status}`)
-      console.error('   URL was:', pdfUrl)
+      console.error(`❌ ${fetchRes.status}: ${fetchRes.statusText}`)
       throw new Error(`HTTP ${fetchRes.status}`)
     }
 
@@ -884,7 +897,7 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
     res.send(Buffer.from(buffer))
   } catch (err) {
     const formatted = formatError(err)
-    console.error('❌ Proxy error:', formatted)
+    console.error('❌ Error:', formatted)
     return res.status(500).json({ error: formatted.message })
   }
 })
