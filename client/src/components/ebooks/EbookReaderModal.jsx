@@ -35,25 +35,28 @@ export default function EbookReaderModal({ ebook, onClose }) {
 			}
 
 			setViewerSrc('')
-				setLoading(true)
+			setLoading(true)
 
-				try {
-					if (item.upload_type === 'cloudinary') {
-						const response = await authFetch(`/api/ebooks/${item.id}/read-url`)
-						if (!response.ok) {
-							const body = await response.json().catch(() => ({}))
-							throw new Error(body?.error || 'Failed to prepare ebook reader')
+			try {
+				let pdfUrl = normalizedPdfUrl
+				
+				if (item.upload_type === 'cloudinary') {
+					const response = await authFetch(`/api/ebooks/${item.id}/read-url`)
+					if (!response.ok) {
+						const body = await response.json().catch(() => ({}))
+						throw new Error(body?.error || 'Failed to prepare ebook reader')
 					}
 
 					const data = await response.json()
 					if (cancelled) return
 
-					const signedUrl = data?.url || normalizedPdfUrl
-					setViewerSrc(buildGoogleViewerUrl(signedUrl))
-					setOpenHref(signedUrl)
-				} else {
-					setViewerSrc(buildGoogleViewerUrl(normalizedPdfUrl))
+					pdfUrl = data?.url || normalizedPdfUrl
 				}
+				
+				// Ensure the PDF URL is properly accessible for Google Viewer
+				const googleViewerUrl = buildGoogleViewerUrl(pdfUrl)
+				setViewerSrc(googleViewerUrl)
+				setOpenHref(pdfUrl)
 			} catch (err) {
 				if (cancelled) return
 

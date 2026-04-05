@@ -850,12 +850,24 @@ app.get('/api/ebooks/:ebookId/read-url', requireAuth, async (req, res) => {
       return res.json({ success: true, url: ebook.file_url })
     }
 
-    // For Cloudinary PDFs, return the direct delivery URL
-    // Cloudinary serves PDFs directly from the delivery URL without needing signing
-    // Just ensure the URL is HTTPS and from Cloudinary
+    // For Cloudinary PDFs, modify URL to display inline instead of downloading
     if (ebook.file_url && ebook.file_url.includes('cloudinary.com')) {
-      // Already a proper Cloudinary URL, return as-is
-      return res.json({ success: true, url: ebook.file_url })
+      try {
+        const url = new URL(ebook.file_url)
+        
+        // Add inline display flag to Cloudinary URL if not already present
+        // This prevents downloading and enables inline viewing
+        if (!url.searchParams.has('fl_attachment')) {
+          url.searchParams.set('fl_attachment', 'false')
+        }
+        
+        const viewableUrl = url.toString()
+        console.log('✅ Cloudinary PDF URL:', viewableUrl)
+        return res.json({ success: true, url: viewableUrl })
+      } catch (urlErr) {
+        console.warn('⚠️ Failed to modify Cloudinary URL:', urlErr.message)
+        return res.json({ success: true, url: ebook.file_url })
+      }
     }
 
     // Fallback: return file_url as-is
