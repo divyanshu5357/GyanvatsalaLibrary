@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { authFetch } from '../../utils/api'
-import { buildGoogleViewerUrl, isPdfUrl, normalizePdfReadUrl } from '../../utils/cloudinaryUpload'
+import { isPdfUrl, normalizePdfReadUrl } from '../../utils/cloudinaryUpload'
 import { normalizeEbook } from '../../utils/ebooks'
 
 export default function EbookReaderModal({ ebook, onClose }) {
-	const [viewerSrc, setViewerSrc] = useState('')
-	const [openHref, setOpenHref] = useState('')
+	const [pdfUrl, setPdfUrl] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [loadError, setLoadError] = useState('')
 	const item = useMemo(() => (ebook ? normalizeEbook(ebook) : null), [ebook])
@@ -13,10 +12,9 @@ export default function EbookReaderModal({ ebook, onClose }) {
 	useEffect(() => {
 		let cancelled = false
 
-		async function resolveReaderSource() {
+		async function resolvePdfUrl() {
 			if (!item) {
-				setViewerSrc('')
-				setOpenHref('')
+				setPdfUrl('')
 				setLoadError('')
 				setLoading(false)
 				return
@@ -25,20 +23,18 @@ export default function EbookReaderModal({ ebook, onClose }) {
 			const normalizedPdfUrl = normalizePdfReadUrl(item.file_url)
 			const pdf = isPdfUrl(normalizedPdfUrl)
 
-			setOpenHref(normalizedPdfUrl)
 			setLoadError('')
 
 			if (!pdf) {
-				setViewerSrc('')
+				setPdfUrl('')
 				setLoading(false)
 				return
 			}
 
-			setViewerSrc('')
 			setLoading(true)
 
 			try {
-				let pdfUrl = normalizedPdfUrl
+				let finalUrl = normalizedPdfUrl
 				
 				if (item.upload_type === 'cloudinary') {
 					const response = await authFetch(`/api/ebooks/${item.id}/read-url`)
@@ -50,17 +46,14 @@ export default function EbookReaderModal({ ebook, onClose }) {
 					const data = await response.json()
 					if (cancelled) return
 
-					pdfUrl = data?.url || normalizedPdfUrl
+					finalUrl = data?.url || normalizedPdfUrl
+					console.log('✅ PDF URL resolved:', finalUrl)
 				}
 				
-				// Ensure the PDF URL is properly accessible for Google Viewer
-				const googleViewerUrl = buildGoogleViewerUrl(pdfUrl)
-				setViewerSrc(googleViewerUrl)
-				setOpenHref(pdfUrl)
+				setPdfUrl(finalUrl)
 			} catch (err) {
 				if (cancelled) return
-
-				setViewerSrc('')
+				console.error('❌ Error resolving PDF URL:', err.message)
 				setLoadError(err.message || 'Failed to load this PDF')
 			} finally {
 				if (!cancelled) {
@@ -69,7 +62,7 @@ export default function EbookReaderModal({ ebook, onClose }) {
 			}
 		}
 
-		resolveReaderSource()
+		resolvePdfUrl()
 
 		return () => {
 			cancelled = true
@@ -80,8 +73,6 @@ export default function EbookReaderModal({ ebook, onClose }) {
 
 	const normalizedPdfUrl = normalizePdfReadUrl(item.file_url)
 	const isPdf = isPdfUrl(normalizedPdfUrl)
-	const actionHref = item.upload_type === 'cloudinary' ? openHref || viewerSrc : viewerSrc || openHref
-	const actionLabel = item.upload_type === 'cloudinary' ? 'Open PDF in New Tab' : 'Open with Google Viewer'
 	const subtitle = item.category_type === 'school'
 		? `${item.subject} · Class ${item.class}`
 		: `${item.custom_category} · Other Study Materials`
@@ -94,7 +85,20 @@ export default function EbookReaderModal({ ebook, onClose }) {
 						<h3 className="font-semibold truncate">{item.title}</h3>
 						<p className="text-xs text-slate-400 truncate">{subtitle}</p>
 					</div>
-					<button onClick={onClose} className="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-sm">✖ Close</button>
+					<div className="flex gap-2">
+						{pdfUrl && (
+							<a
+								href={pdfUrl}
+								target="_blank"
+								rel="noreferrer"
+								download
+								className="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-sm whitespace-nowrap"
+							>
+								⬇ Download
+							</a>
+						)}
+						<button onClick={onClose} className="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-sm">✖ Close</button>
+					</div>
 				</div>
 
 				{!isPdf ? (
@@ -114,59 +118,33 @@ export default function EbookReaderModal({ ebook, onClose }) {
 					<div className="p-6 m-4 rounded-xl border border-red-400/40 bg-red-500/10 text-red-100 space-y-3">
 						<h4 className="font-semibold">Unable to open this PDF</h4>
 						<p className="text-sm">{loadError}</p>
-						{openHref && (
+						{pdfUrl && (
 							<a
-								href={openHref}
+								href={pdfUrl}
 								target="_blank"
 								rel="noreferrer"
 								className="inline-block px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm"
 							>
-								Open original link
+								Open in new tab
 							</a>
 						)}
 					</div>
+				) : loading ? (
+					<div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-300 text-sm">
+						Preparing your ebook...
+					</div>
+				) : pdfUrl ? (
+					<iframe
+						title={`Read ${item.title}`}
+						src={pdfUrl}
+						className="w-full flex-1 bg-slate-950"
+						allow="fullscreen"
+						sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+					/>
 				) : (
-					<>
-						<div className="px-4 py-2 text-xs text-slate-300 bg-slate-900/40 border-b border-slate-800 flex items-center justify-between">
-							<span>{loading ? 'Preparing PDF Reader...' : 'PDF Reader Mode'}</span>
-							{actionHref && (
-								<a
-									href={actionHref}
-									target="_blank"
-									rel="noreferrer"
-									className="text-indigo-300 hover:text-indigo-200 underline"
-								>
-									{actionLabel}
-								</a>
-							)}
-						</div>
-
-						{loading ? (
-							<div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-300 text-sm">
-								Preparing your ebook...
-							</div>
-						) : viewerSrc ? (
-							<iframe
-								title={`Read ${item.title}`}
-								src={viewerSrc}
-								className="w-full flex-1 bg-slate-950"
-								allow="autoplay"
-								sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-							/>
-						) : actionHref ? (
-							<iframe
-								title={`Read ${item.title}`}
-								src={actionHref}
-								className="w-full flex-1 bg-slate-950"
-								allow="autoplay"
-								sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-							/>
-						) : (
-							<div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-300 text-sm">
-								Unable to load PDF. Please open it directly.
-							</div>
-						)}
-					</>
+					<div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-300 text-sm">
+						Unable to load PDF. Please try again or open directly.
+					</div>
 				)}
 			</div>
 		</div>
