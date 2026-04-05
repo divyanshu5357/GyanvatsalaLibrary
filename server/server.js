@@ -54,6 +54,20 @@ function isAllowedOrigin(origin, allowedOrigins, allowVercelPreviews, allowRende
   return false
 }
 
+// Generate Cloudinary signed URL for secure delivery
+function generateCloudinarySignedUrl(publicId, cloudName = 'dghcsoc48', apiSecret) {
+  if (!apiSecret) return null
+  
+  const timestamp = Math.floor(Date.now() / 1000)
+  const params = `public_id=${publicId}&timestamp=${timestamp}`
+  const signature = crypto
+    .createHash('sha1')
+    .update(params + apiSecret)
+    .digest('hex')
+  
+  return `https://res.cloudinary.com/${cloudName}/raw/upload/${publicId}?timestamp=${timestamp}&signature=${signature}`
+}
+
 const env = {
   ...loadEnv(),
   ...process.env,
@@ -913,22 +927,30 @@ app.get('/api/ebooks/:ebookId/read-url', requireAuth, async (req, res) => {
       .maybeSingle()
 
     if (error) throw error
-    if (!ebook) return res.status(404).json({ error: 'Ebook not found' })
-    if (!ebook.file_url) return res.status(400).json({ error: 'Ebook file URL is missing' })
+    if (!ebook) return res.status(404).json({ error: 'Not found' })
+    if (!ebook.file_url) return res.status(400).json({ error: 'No URL' })
 
-    // For external URLs (not from Cloudinary), return as-is
+    // For external URLs, return as-is
     if (ebook.upload_type !== 'cloudinary') {
-      console.log('✅ External PDF URL:', ebook.file_url)
+      console.log('✅ External PDF URL')
       return res.json({ success: true, url: ebook.file_url })
     }
 
-    // For Cloudinary PDFs, return proxy endpoint URL instead of direct Cloudinary URL
+    // For Cloudinary PDFs, generate signed URL
+    const publicId = ebook.file_public_id
+    if (publicId && env.CLOUDINARY_API_SECRET) {
+      const signedUrl = generateCloudinarySignedUrl(publicId, 'dghcsoc48', env.CLOUDINARY_API_SECRET)
+      console.log('✅ Signed URL generated for:', ebook.title)
+      return res.json({ success: true, url: signedUrl })
+    }
+
+    // Fallback to proxy if no API secret
     const proxyUrl = `/api/ebooks/${ebookId}/proxy-pdf`
-    console.log('✅ Proxy PDF via:', proxyUrl)
+    console.log('✅ Using proxy:', proxyUrl)
     return res.json({ success: true, url: proxyUrl })
   } catch (err) {
     const formatted = formatError(err)
-    console.error('❌ Error generating ebook read URL:', formatted)
+    console.error('❌ Error:', formatted)
     return res.status(500).json({ error: formatted.message })
   }
 })
