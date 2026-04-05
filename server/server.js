@@ -71,9 +71,15 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:4173',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://gyanvatsala.in',
+  'https://www.gyanvatsala.in',
   ...parseEnvList(env.ALLOWED_ORIGINS),
   ...parseEnvList(frontendUrl),
 ])
+
+console.log('✅ CORS allowed origins:', Array.from(allowedOrigins))
 const allowVercelPreviews = String(env.ALLOW_VERCEL_PREVIEWS || '').toLowerCase() === 'true'
 const allowRenderPreviews = String(env.ALLOW_RENDER_PREVIEWS || 'true').toLowerCase() === 'true'
 
@@ -81,12 +87,16 @@ const app = express()
 app.use(cors({
   origin(origin, callback) {
     if (isAllowedOrigin(origin, allowedOrigins, allowVercelPreviews, allowRenderPreviews)) {
+      console.log(`✅ CORS allowed: ${origin}`)
       return callback(null, true)
     }
+    console.warn(`❌ CORS blocked: ${origin}`)
     return callback(new Error(`Origin ${origin} not allowed by CORS`))
   },
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400,
 }))
 app.use(express.json())
 

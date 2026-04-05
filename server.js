@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import crypto from 'crypto'
+import webpush from 'web-push'
 
 // Load environment variables from .env file manually
 const __filename = fileURLToPath(import.meta.url)
@@ -50,8 +51,6 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
   'https://gyanvatsala.in',
   'https://www.gyanvatsala.in',
-  'https://gyanvatsala-library-web.onrender.com',
-  'https://library-app-zkyy.onrender.com'
 ]
 
 // Add Render frontend URL if running on Render
