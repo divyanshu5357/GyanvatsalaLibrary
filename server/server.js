@@ -831,7 +831,7 @@ app.get('/api/ebooks', requireAuth, async (req, res) => {
   }
 })
 
-// Proxy PDF through backend to handle auth and Cloudinary access issues
+// Proxy PDF through backend to handle Cloudinary unsigned URLs
 app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
   try {
     const { ebookId } = req.params
@@ -846,49 +846,41 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
     if (!ebook) return res.status(404).json({ error: 'Ebook not found' })
     if (!ebook.file_url) return res.status(400).json({ error: 'Ebook file URL is missing' })
 
-    console.log('📥 Proxying PDF for ebook:', ebook.title)
-    console.log('   File URL:', ebook.file_url)
+    console.log('📥 Proxying PDF:', ebook.title)
 
-    // Fetch from origin URL
+    // For Cloudinary unsigned URLs, remove transformation params that require signing
     let pdfUrl = ebook.file_url
-    
-    // For Cloudinary, add inline display flag
-    if (ebook.upload_type === 'cloudinary' && ebook.file_url.includes('cloudinary.com')) {
+    if (ebook.upload_type === 'cloudinary' && pdfUrl.includes('cloudinary.com')) {
       try {
-        const url = new URL(ebook.file_url)
-        if (!url.searchParams.has('fl_attachment')) {
-          url.searchParams.set('fl_attachment', 'false')
-        }
+        const url = new URL(pdfUrl)
+        // Remove fl_attachment and other transformation params for unsigned URLs
+        url.searchParams.delete('fl_attachment')
         pdfUrl = url.toString()
+        console.log('   Cleaned URL for unsigned access')
       } catch (_) {
-        // continue with original URL if parsing fails
+        // continue with original URL
       }
     }
 
     const fetchRes = await fetch(pdfUrl, {
       method: 'GET',
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      timeout: 30000
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     })
 
     if (!fetchRes.ok) {
-      console.error(`❌ Failed to fetch PDF: ${fetchRes.status} ${fetchRes.statusText}`)
-      return res.status(fetchRes.status).json({ 
-        error: `Failed to fetch PDF: ${fetchRes.statusText}`,
-        pdfUrl: pdfUrl // Return URL for debugging
-      })
+      console.error(`❌ PDF fetch failed: ${fetchRes.status}`)
+      throw new Error(`Cloudinary returned ${fetchRes.status}`)
     }
 
-    // Stream PDF to client
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', 'inline; filename="document.pdf"')
-    res.setHeader('Cache-Control', 'public, max-age=3600')
+    res.setHeader('Content-Disposition', 'inline; filename="ebook.pdf"')
+    res.setHeader('Cache-Control', 'public, max-age=86400')
     
-    console.log('✅ PDF proxy streaming:', ebook.title)
+    console.log('✅ Streaming PDF')
     fetchRes.body.pipe(res)
   } catch (err) {
     const formatted = formatError(err)
-    console.error('❌ Error proxying PDF:', formatted)
+    console.error('❌ PDF proxy error:', formatted)
     return res.status(500).json({ error: formatted.message })
   }
 })
