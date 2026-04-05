@@ -832,12 +832,10 @@ app.get('/api/ebooks', requireAuth, async (req, res) => {
 })
 
 // Proxy PDF through backend - no auth required for iframe embedding
-// The read-url endpoint is still protected, so only authenticated users get the URL
 app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
   try {
     const { ebookId } = req.params
 
-    // Verify ebook exists
     const { data: ebook, error } = await supabaseAdmin
       .from('ebooks')
       .select('id, title, upload_type, file_url, file_public_id')
@@ -846,43 +844,60 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
 
     if (error) throw error
     if (!ebook) return res.status(404).json({ error: 'Not found' })
-    if (!ebook.file_url) return res.status(400).json({ error: 'No URL' })
 
     console.log('📥 Proxy:', ebook.title)
-    console.log('   Original:', ebook.file_url)
 
     let pdfUrl = ebook.file_url
 
-    // For Cloudinary, use original URL as-is (unsigned URLs work with original format)
-    if (ebook.upload_type === 'cloudinary') {
-      console.log('   Cloudinary file')
+    // For Cloudinary, try multiple URL variations
+    if (ebook.upload_type === 'cloudinary' && pdfUrl.includes('cloudinary.com')) {
+      try {
+        const url = new URL(pdfUrl)
+        
+        // Try 1: Add q_auto for quality auto-handling
+        const urlWithQAuto = new URL(pdfUrl)
+        urlWithQAuto.searchParams.set('q_auto', 'best')
+        
+        console.log('   Trying with q_auto...')
+        let res1 = await fetch(urlWithQAuto.toString(), { method: 'HEAD' })
+        if (res1.ok) {
+          pdfUrl = urlWithQAuto.toString()
+          console.log('   ✓ Works with q_auto')
+        } else {
+          console.log('   ✗ q_auto failed, trying original')
+        }
+      } catch (e) {
+        console.log('   Using original URL')
+      }
     }
 
-    console.log('   Fetching from:', pdfUrl)
-    const fetchRes = await fetch(pdfUrl, {
-      method: 'GET',
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    })
-
-    console.log('   Response:', fetchRes.status)
+    console.log('   Fetching:', pdfUrl.substring(0, 100) + '...')
+    const fetchRes = await fetch(pdfUrl)
 
     if (!fetchRes.ok) {
-      console.error(`❌ Fetch failed: ${fetchRes.status}`)
-      return res.status(fetchRes.status).json({ error: `Cloudinary: ${fetchRes.status}` })
+      console.error(`❌ ${fetchRes.status} from Cloudinary`)
+      
+      // If Cloudinary fails, return the URL for debugging
+      if (pdfUrl.includes('cloudinary.com')) {
+        console.log('   Cloudinary URL:', pdfUrl)
+        return res.status(400).json({ 
+          error: `Cloudinary returned ${fetchRes.status}`,
+          hint: 'Check Cloudinary settings: unsigned uploads enabled? Upload preset correct?',
+          url: pdfUrl
+        })
+      }
+      
+      throw new Error(`HTTP ${fetchRes.status}`)
     }
 
     const buffer = await fetchRes.arrayBuffer()
-    
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', 'inline; filename="ebook.pdf"')
-    res.setHeader('Content-Length', buffer.byteLength)
-    
-    console.log('✅ Sent:', buffer.byteLength, 'bytes')
+    res.setHeader('Content-Disposition', 'inline')
     res.send(Buffer.from(buffer))
+    console.log('✅ Sent:', buffer.byteLength, 'bytes')
   } catch (err) {
-    const formatted = formatError(err)
-    console.error('❌ Error:', err.message)
-    return res.status(500).json({ error: err.message })
+    console.error('❌', err.message)
+    res.status(500).json({ error: err.message })
   }
 })
 
