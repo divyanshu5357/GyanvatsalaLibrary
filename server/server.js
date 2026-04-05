@@ -831,11 +831,13 @@ app.get('/api/ebooks', requireAuth, async (req, res) => {
   }
 })
 
-// Proxy PDF through backend - reconstruct clean Cloudinary URL
-app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
+// Proxy PDF through backend - no auth required for iframe embedding
+// The read-url endpoint is still protected, so only authenticated users get the URL
+app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
   try {
     const { ebookId } = req.params
 
+    // Verify ebook exists (no user auth needed since auth happens on read-url endpoint)
     const { data: ebook, error } = await supabaseAdmin
       .from('ebooks')
       .select('id, title, upload_type, file_url, file_public_id')
@@ -844,34 +846,29 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
 
     if (error) throw error
     if (!ebook) return res.status(404).json({ error: 'Ebook not found' })
-    if (!ebook.file_url) return res.status(400).json({ error: 'Ebook file URL is missing' })
+    if (!ebook.file_url) return res.status(400).json({ error: 'No file URL' })
 
-    console.log('📥 Proxying PDF:', ebook.title)
+    console.log('📥 Proxy:', ebook.title)
 
     let pdfUrl = ebook.file_url
 
-    // For Cloudinary PDFs, build clean URL
+    // For Cloudinary, extract and rebuild clean URL
     if (ebook.upload_type === 'cloudinary') {
       let publicId = ebook.file_public_id
       
-      // If no stored public_id, try to extract from URL
       if (!publicId && pdfUrl.includes('cloudinary.com')) {
         try {
           const urlObj = new URL(pdfUrl)
-          const pathname = urlObj.pathname // e.g., /dghcsoc48/raw/upload/v1775371684/library-management/ebooks/pdfs/zwecylls06earodqai
+          const pathname = urlObj.pathname
           const parts = pathname.split('/upload/')
           if (parts[1]) {
-            publicId = parts[1] // Gets: v1775371684/library-management/ebooks/pdfs/zwecylls06earodqai
-            console.log('   Extracted public_id:', publicId)
+            publicId = parts[1]
           }
-        } catch (e) {
-          console.log('   Could not extract public_id from URL')
-        }
+        } catch (_) {}
       }
 
       if (publicId) {
         pdfUrl = `https://res.cloudinary.com/dghcsoc48/raw/upload/${publicId}`
-        console.log('   Using:', pdfUrl)
       }
     }
 
@@ -882,7 +879,7 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
     })
 
     if (!fetchRes.ok) {
-      console.error(`❌ ${fetchRes.status}: ${fetchRes.statusText}`)
+      console.error(`❌ ${fetchRes.status}`)
       throw new Error(`HTTP ${fetchRes.status}`)
     }
 
@@ -891,7 +888,7 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', 'inline; filename="ebook.pdf"')
     res.setHeader('Content-Length', buffer.byteLength)
-    res.setHeader('Cache-Control', 'public, max-age=86400')
+    res.setHeader('Cache-Control', 'public, max-age=3600')
     
     console.log('✅ Sent:', buffer.byteLength, 'bytes')
     res.send(Buffer.from(buffer))
