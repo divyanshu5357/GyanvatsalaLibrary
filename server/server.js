@@ -206,14 +206,36 @@ async function requireAuth(req, res, next) {
       return res.status(401).json({ error: 'Invalid or expired session' })
     }
 
-    const { data: profile, error: profileError } = await supabaseAdmin
+    let { data: profile, error: profileError } = await supabaseAdmin
       .from('users')
       .select('id, email, name, role')
       .eq('id', user.id)
       .maybeSingle()
 
+    // If profile doesn't exist, create a default student profile
     if (profileError || !profile) {
-      return res.status(403).json({ error: 'User profile not found' })
+      console.log('⚠️ Profile missing for user:', user.id)
+      
+      // Try to create default profile
+      const { data: newProfile, error: createError } = await supabaseAdmin
+        .from('users')
+        .insert([{
+          id: user.id,
+          email: user.email,
+          name: user.email?.split('@')[0] || 'User',
+          role: 'student',
+          created_at: new Date().toISOString(),
+        }])
+        .select()
+        .single()
+
+      if (createError) {
+        console.error('❌ Failed to create profile:', createError.message)
+        return res.status(403).json({ error: 'User profile not found' })
+      }
+
+      profile = newProfile
+      console.log('✅ Created default profile for user:', user.id)
     }
 
     req.authUser = user
