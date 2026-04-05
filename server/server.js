@@ -837,7 +837,7 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
   try {
     const { ebookId } = req.params
 
-    // Verify ebook exists (no user auth needed since auth happens on read-url endpoint)
+    // Verify ebook exists
     const { data: ebook, error } = await supabaseAdmin
       .from('ebooks')
       .select('id, title, upload_type, file_url, file_public_id')
@@ -845,42 +845,30 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
       .maybeSingle()
 
     if (error) throw error
-    if (!ebook) return res.status(404).json({ error: 'Ebook not found' })
-    if (!ebook.file_url) return res.status(400).json({ error: 'No file URL' })
+    if (!ebook) return res.status(404).json({ error: 'Not found' })
+    if (!ebook.file_url) return res.status(400).json({ error: 'No URL' })
 
     console.log('📥 Proxy:', ebook.title)
+    console.log('   Original:', ebook.file_url)
 
     let pdfUrl = ebook.file_url
 
-    // For Cloudinary, extract and rebuild clean URL
+    // For Cloudinary, use original URL as-is (unsigned URLs work with original format)
     if (ebook.upload_type === 'cloudinary') {
-      let publicId = ebook.file_public_id
-      
-      if (!publicId && pdfUrl.includes('cloudinary.com')) {
-        try {
-          const urlObj = new URL(pdfUrl)
-          const pathname = urlObj.pathname
-          const parts = pathname.split('/upload/')
-          if (parts[1]) {
-            publicId = parts[1]
-          }
-        } catch (_) {}
-      }
-
-      if (publicId) {
-        pdfUrl = `https://res.cloudinary.com/dghcsoc48/raw/upload/${publicId}`
-      }
+      console.log('   Cloudinary file')
     }
 
-    console.log('   Fetching...')
+    console.log('   Fetching from:', pdfUrl)
     const fetchRes = await fetch(pdfUrl, {
       method: 'GET',
       headers: { 'User-Agent': 'Mozilla/5.0' }
     })
 
+    console.log('   Response:', fetchRes.status)
+
     if (!fetchRes.ok) {
-      console.error(`❌ ${fetchRes.status}`)
-      throw new Error(`HTTP ${fetchRes.status}`)
+      console.error(`❌ Fetch failed: ${fetchRes.status}`)
+      return res.status(fetchRes.status).json({ error: `Cloudinary: ${fetchRes.status}` })
     }
 
     const buffer = await fetchRes.arrayBuffer()
@@ -888,14 +876,13 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', 'inline; filename="ebook.pdf"')
     res.setHeader('Content-Length', buffer.byteLength)
-    res.setHeader('Cache-Control', 'public, max-age=3600')
     
     console.log('✅ Sent:', buffer.byteLength, 'bytes')
     res.send(Buffer.from(buffer))
   } catch (err) {
     const formatted = formatError(err)
-    console.error('❌ Error:', formatted)
-    return res.status(500).json({ error: formatted.message })
+    console.error('❌ Error:', err.message)
+    return res.status(500).json({ error: err.message })
   }
 })
 
