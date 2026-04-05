@@ -9,65 +9,58 @@ export default function EbookReaderModal({ ebook, onClose }) {
 	const [loadError, setLoadError] = useState('')
 	const item = useMemo(() => (ebook ? normalizeEbook(ebook) : null), [ebook])
 
-	useEffect(() => {
-		let cancelled = false
+		useEffect(() => {
+			let cancelled = false
 
-		async function resolvePdfUrl() {
-			if (!item) {
-				setPdfUrl('')
-				setLoadError('')
-				setLoading(false)
-				return
-			}
-
-			const normalizedPdfUrl = normalizePdfReadUrl(item.file_url)
-			const pdf = isPdfUrl(normalizedPdfUrl)
-
-			setLoadError('')
-
-			if (!pdf) {
-				setPdfUrl('')
-				setLoading(false)
-				return
-			}
-
-			setLoading(true)
-
-			try {
-				let finalUrl = normalizedPdfUrl
-				
-				if (item.upload_type === 'cloudinary') {
-					const response = await authFetch(`/api/ebooks/${item.id}/read-url`)
-					if (!response.ok) {
-						const body = await response.json().catch(() => ({}))
-						throw new Error(body?.error || 'Failed to prepare ebook reader')
-					}
-
-					const data = await response.json()
-					if (cancelled) return
-
-					finalUrl = data?.url || normalizedPdfUrl
-					console.log('✅ PDF URL resolved:', finalUrl)
-				}
-				
-				setPdfUrl(finalUrl)
-			} catch (err) {
-				if (cancelled) return
-				console.error('❌ Error resolving PDF URL:', err.message)
-				setLoadError(err.message || 'Failed to load this PDF')
-			} finally {
-				if (!cancelled) {
+			async function resolvePdfUrl() {
+				if (!item) {
+					setPdfUrl('')
+					setLoadError('')
 					setLoading(false)
+					return
+				}
+
+				const normalizedPdfUrl = normalizePdfReadUrl(item.file_url)
+				const pdf = isPdfUrl(normalizedPdfUrl)
+
+				setLoadError('')
+
+				if (!pdf) {
+					setPdfUrl('')
+					setLoading(false)
+					return
+				}
+
+				setLoading(true)
+
+				try {
+					let finalUrl = normalizedPdfUrl
+					
+					// For Cloudinary PDFs, use the proxy endpoint that streams from backend
+					// This avoids CORS/security issues with direct Cloudinary URLs
+					if (item.upload_type === 'cloudinary') {
+						finalUrl = `/api/ebooks/${item.id}/proxy-pdf`
+						console.log('✅ Using proxy URL:', finalUrl)
+					}
+					
+					setPdfUrl(finalUrl)
+				} catch (err) {
+					if (cancelled) return
+					console.error('❌ Error resolving PDF URL:', err.message)
+					setLoadError(err.message || 'Failed to load this PDF')
+				} finally {
+					if (!cancelled) {
+						setLoading(false)
+					}
 				}
 			}
-		}
 
-		resolvePdfUrl()
+			resolvePdfUrl()
 
-		return () => {
-			cancelled = true
-		}
-	}, [item])
+			return () => {
+				cancelled = true
+			}
+		}, [item])
 
 	if (!item) return null
 
@@ -138,8 +131,8 @@ export default function EbookReaderModal({ ebook, onClose }) {
 						title={`Read ${item.title}`}
 						src={pdfUrl}
 						className="w-full flex-1 bg-slate-950"
-						allow="fullscreen"
-						sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+						sandbox="allow-same-origin allow-scripts allow-forms"
+						style={{ border: 'none' }}
 					/>
 				) : (
 					<div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-300 text-sm">
