@@ -19,17 +19,25 @@ async function fetchVerifiedProfile(accessToken) {
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({}))
+      
       if (response.status === 401) {
-        throw new Error('Unauthorized: Please check your credentials')
+        console.error('Auth 401:', body?.error)
+        throw new Error('Invalid email or password')
       }
-      throw new Error(body?.error || 'Failed to validate session')
+      
+      if (response.status === 403) {
+        console.error('Auth 403:', body?.error)
+        throw new Error('User account not configured. Please contact admin.')
+      }
+      
+      throw new Error(body?.error || 'Login failed')
     }
 
     const data = await response.json()
     const profile = data?.profile || null
 
     if (!profile?.id || !ALLOWED_ROLES.has(profile.role)) {
-      throw new Error('Invalid user profile or role')
+      throw new Error('User account does not have permission to access this platform')
     }
 
     return profile
