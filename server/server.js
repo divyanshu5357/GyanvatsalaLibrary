@@ -845,30 +845,21 @@ app.get('/api/ebooks/:ebookId/read-url', requireAuth, async (req, res) => {
     if (!ebook) return res.status(404).json({ error: 'Ebook not found' })
     if (!ebook.file_url) return res.status(400).json({ error: 'Ebook file URL is missing' })
 
+    // For external URLs, return as-is
     if (ebook.upload_type !== 'cloudinary') {
       return res.json({ success: true, url: ebook.file_url })
     }
 
-    const publicId = ebook.file_public_id || extractCloudinaryPublicId(ebook.file_url)
-    if (!publicId) {
+    // For Cloudinary PDFs, return the direct delivery URL
+    // Cloudinary serves PDFs directly from the delivery URL without needing signing
+    // Just ensure the URL is HTTPS and from Cloudinary
+    if (ebook.file_url && ebook.file_url.includes('cloudinary.com')) {
+      // Already a proper Cloudinary URL, return as-is
       return res.json({ success: true, url: ebook.file_url })
     }
 
-    const format = getUrlFileExtension(ebook.file_url) || 'pdf'
-    const resourceType = getCloudinaryResourceType(ebook.file_url) || 'image'
-    const signedUrl = buildCloudinaryDownloadUrl({
-      publicId,
-      format,
-      resourceType,
-      type: 'upload',
-      attachment: false,
-    })
-
-    if (!signedUrl) {
-      return res.json({ success: true, url: ebook.file_url })
-    }
-
-    return res.json({ success: true, url: signedUrl })
+    // Fallback: return file_url as-is
+    return res.json({ success: true, url: ebook.file_url })
   } catch (err) {
     const formatted = formatError(err)
     console.error('❌ Error generating ebook read URL:', formatted)

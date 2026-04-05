@@ -77,5 +77,8 @@ export async function uploadFileToCloudinary(file, { resourceType = 'auto', fold
 }
 
 export function buildGoogleViewerUrl(fileUrl) {
-	return `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`
+	if (!fileUrl) return ''
+	// Ensure URL is properly encoded
+	const encodedUrl = encodeURIComponent(fileUrl)
+	return `https://docs.google.com/gview?url=${encodedUrl}&embedded=true`
 }

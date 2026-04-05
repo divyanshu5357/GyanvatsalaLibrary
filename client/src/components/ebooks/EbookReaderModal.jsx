@@ -142,13 +142,26 @@ export default function EbookReaderModal({ ebook, onClose }) {
 							<div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-300 text-sm">
 								Preparing your ebook...
 							</div>
-						) : (
+						) : viewerSrc ? (
 							<iframe
 								title={`Read ${item.title}`}
 								src={viewerSrc}
 								className="w-full flex-1 bg-slate-950"
 								allow="autoplay"
+								sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
 							/>
+						) : actionHref ? (
+							<iframe
+								title={`Read ${item.title}`}
+								src={actionHref}
+								className="w-full flex-1 bg-slate-950"
+								allow="autoplay"
+								sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+							/>
+						) : (
+							<div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-300 text-sm">
+								Unable to load PDF. Please open it directly.
+							</div>
 						)}
 					</>
 				)}
