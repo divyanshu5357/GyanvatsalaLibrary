@@ -192,11 +192,9 @@ const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 async function requireAuth(req, res, next) {
   try {
     const authHeader = req.headers.authorization || ''
-    if (!authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authentication required' })
-    }
-
-    const token = authHeader.slice(7).trim()
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : ''
+    const queryToken = typeof req.query.token === 'string' ? req.query.token.trim() : ''
+    const token = bearerToken || queryToken
     if (!token) {
       return res.status(401).json({ error: 'Authentication required' })
     }
@@ -248,13 +246,14 @@ async function requireAuth(req, res, next) {
 }
 
 function requireRole(role) {
+  const allowed = Array.isArray(role) ? role : [role]
   return (req, res, next) => {
     if (!req.authProfile) {
       return res.status(401).json({ error: 'Authentication required' })
     }
 
-    if (req.authProfile.role !== role) {
-      return res.status(403).json({ error: `${role} access required` })
+    if (!allowed.includes(req.authProfile.role)) {
+      return res.status(403).json({ error: `${allowed.join(' or ')} access required` })
     }
 
     next()
@@ -270,6 +269,30 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
     },
     profile: req.authProfile,
   })
+})
+
+// Check if an email is registered — used only to give specific login error messages
+app.post('/api/auth/check-email', async (req, res) => {
+  try {
+    const { email } = req.body || {}
+    if (!email) return res.status(400).json({ error: 'email required' })
+
+    const normalizedEmail = String(email).trim().toLowerCase()
+
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('email', normalizedEmail)
+      .maybeSingle()
+
+    if (error) throw error
+
+    return res.json({ exists: !!data })
+  } catch (err) {
+    console.error('❌ check-email error:', err.message)
+    // On error, don't reveal internals — fail safe
+    return res.status(500).json({ error: 'Unable to verify email' })
+  }
 })
 
 function formatError(err) {
@@ -466,6 +489,17 @@ function extractCloudinaryPublicId(fileUrl = '') {
     const publicId = assetParts.join('/').replace(/\.[a-z0-9]+$/i, '')
 
     return publicId
+  } catch (_) {
+    return ''
+  }
+}
+
+function extractCloudinaryResourceType(fileUrl = '') {
+  if (!fileUrl) return ''
+
+  try {
+    const parts = new URL(fileUrl).pathname.split('/').filter(Boolean)
+    return parts[1] || ''
   } catch (_) {
     return ''
   }
@@ -867,8 +901,8 @@ app.get('/api/ebooks', requireAuth, async (req, res) => {
   }
 })
 
-// Proxy PDF through backend - no auth required for iframe embedding
-app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
+// Proxy PDF through backend - auth required
+app.get('/api/ebooks/:ebookId/proxy-pdf', requireAuth, async (req, res) => {
   try {
     const { ebookId } = req.params
 
@@ -884,26 +918,16 @@ app.get('/api/ebooks/:ebookId/proxy-pdf', async (req, res) => {
     console.log('📥 Proxy:', ebook.title)
 
     let pdfUrl = ebook.file_url
+    const cloudinaryResourceType = extractCloudinaryResourceType(pdfUrl)
 
-    // For Cloudinary, try multiple URL variations
-    if (ebook.upload_type === 'cloudinary' && pdfUrl.includes('cloudinary.com')) {
-      try {
-        const url = new URL(pdfUrl)
-        
-        // Try 1: Add q_auto for quality auto-handling
-        const urlWithQAuto = new URL(pdfUrl)
-        urlWithQAuto.searchParams.set('q_auto', 'best')
-        
-        console.log('   Trying with q_auto...')
-        let res1 = await fetch(urlWithQAuto.toString(), { method: 'HEAD' })
-        if (res1.ok) {
-          pdfUrl = urlWithQAuto.toString()
-          console.log('   ✓ Works with q_auto')
-        } else {
-          console.log('   ✗ q_auto failed, trying original')
+    // Only image delivery URLs support this flag transformation cleanly.
+    if (ebook.upload_type === 'cloudinary' && pdfUrl.includes('cloudinary.com') && cloudinaryResourceType === 'image') {
+      if (pdfUrl.includes('/upload/') && !pdfUrl.includes('fl_attachment')) {
+        const parts = pdfUrl.split('/upload/')
+        if (parts.length === 2) {
+          pdfUrl = `${parts[0]}/upload/fl_attachment/${parts[1]}`
+          console.log('   Appended fl_attachment to bypass Cloudinary restrictions')
         }
-      } catch (e) {
-        console.log('   Using original URL')
       }
     }
 
@@ -1407,7 +1431,7 @@ app.post('/api/admin/set-password', requireAuth, requireRole('admin'), async (re
       return res.status(400).json({ error: 'Password must be at least 6 characters' })
     }
 
-    // Get the user_id from student
+    // Get the user_id from student and verify the target user is a student
     const { data: student, error: studentError } = await supabaseAdmin
       .from('students')
       .select('user_id')
@@ -1417,6 +1441,18 @@ app.post('/api/admin/set-password', requireAuth, requireRole('admin'), async (re
     if (studentError) throw studentError
 
     const userId = student.user_id
+
+    // Safety check: confirm the target account has the student role
+    const { data: targetProfile, error: profileError } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('id', userId)
+      .single()
+
+    if (profileError) throw profileError
+    if (targetProfile.role !== 'student') {
+      return res.status(403).json({ error: 'Cannot set password for non-student accounts via this endpoint' })
+    }
 
     // Update auth user password using admin API
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
@@ -1449,12 +1485,25 @@ app.post('/api/admin/send-reminder', requireAuth, requireRole('admin'), async (r
       return res.status(400).json({ error: 'studentId, studentEmail, and studentName required' })
     }
 
-    // Create notification record (best-effort)
+    // Resolve user_id from the students table so the notification uses user_id
+    // (consistent with the rest of the notification system)
+    const { data: studentRow, error: studentLookupError } = await supabaseAdmin
+      .from('students')
+      .select('user_id')
+      .eq('id', studentId)
+      .single()
+
+    if (studentLookupError) {
+      console.warn('⚠️ Could not resolve user_id for reminder:', studentLookupError.message)
+      return res.status(400).json({ error: 'Student not found' })
+    }
+
+    // Create notification record using user_id (not student_id) — consistent schema
     let notification = null
     const { data: insertedNotification, error: notifError } = await supabaseAdmin
       .from('notifications')
       .insert({
-        student_id: studentId,
+        user_id: studentRow.user_id,
         type: 'fee_reminder',
         title: 'Fee Reminder',
         message: `Hi ${studentName}, please submit your pending fee at your earliest convenience.`,
@@ -1638,6 +1687,9 @@ function initializeAutoReminder() {
   console.log(`⏰ Auto-reminder system initialized`)
   console.log(`   Next check scheduled in ${Math.floor(timeUntilNextRun / (1000 * 60))} minutes`)
 
+  // Mark as scheduled immediately — before the timer fires — to prevent duplicates on restart
+  autoReminderScheduled = true
+
   // Schedule the first run
   setTimeout(() => {
     checkAndSendReminders()
@@ -1646,8 +1698,6 @@ function initializeAutoReminder() {
     setInterval(() => {
       checkAndSendReminders()
     }, 24 * 60 * 60 * 1000) // Run every 24 hours
-
-    autoReminderScheduled = true
   }, timeUntilNextRun)
 }
 
@@ -1669,13 +1719,7 @@ app.get('/api/admin/trigger-reminders', requireAuth, requireRole('admin'), async
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })
 })
-const frontendPath = path.join(__dirname, '../client/dist')
-
-app.use(express.static(frontendPath))
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'))
-})
+// API info route — must be registered BEFORE the catch-all wildcard
 app.get('/api', (_req, res) => {
   res.json({
     name: 'Gyanvatsala Library API',
@@ -1686,6 +1730,7 @@ app.get('/api', (_req, res) => {
 if (hasFrontendBuild) {
   app.use(express.static(frontendDistPath))
 
+  // Catch-all for SPA — skip /api/* and /health so API routes are not swallowed
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/') || req.path === '/api' || req.path === '/health') {
       return next()

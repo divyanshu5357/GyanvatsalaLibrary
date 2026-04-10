@@ -60,7 +60,7 @@ export default function CreateStudentModal({ open, onClose, onSuccess }) {
       setCreatedStudent(result.student)
       showAlert({
         title: 'Student Created! 🎉',
-        message: `Password: ${result.student.tempPassword}`,
+        message: `Account created for ${result.student.name}. Note the temporary password shown below.`,
         type: 'success',
         duration: 5000,
       })

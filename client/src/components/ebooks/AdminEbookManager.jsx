@@ -296,7 +296,7 @@ export default function AdminEbookManager() {
 
       if (editingId) {
         setEbooks((prev) => prev.map((item) => (item.id === editingId ? nextEbook : item)))
-        setOpStatus({ type: 'success', message: 'Ebook updated successfully.' })
+        setOpStatus({ type: 'success', message: 'Book updated successfully.' })
         showAlert({
           title: 'Ebook updated',
           message: 'Changes saved successfully.',

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { authFetch } from '../../utils/api'
+import { supabase } from '../../supabase'
 import { isPdfUrl, normalizePdfReadUrl } from '../../utils/cloudinaryUpload'
 import { normalizeEbook } from '../../utils/ebooks'
 
@@ -37,12 +37,15 @@ export default function EbookReaderModal({ ebook, onClose }) {
 					let finalUrl = normalizedPdfUrl
 					
 					// For Cloudinary PDFs, use the proxy endpoint that streams from backend
-					// This avoids CORS/security issues with direct Cloudinary URLs
 					if (item.upload_type === 'cloudinary') {
-						finalUrl = `/api/ebooks/${item.id}/proxy-pdf`
-						console.log('✅ Using proxy URL:', finalUrl)
+						const { data: { session } } = await supabase.auth.getSession()
+						const token = session?.access_token || ''
+						const proxyUrl = `/api/ebooks/${item.id}/proxy-pdf?token=${encodeURIComponent(token)}`
+						console.log('✅ Fetching secure PDF via proxy stream')
+						finalUrl = proxyUrl
 					}
 					
+					if (cancelled) return
 					setPdfUrl(finalUrl)
 				} catch (err) {
 					if (cancelled) return
@@ -131,7 +134,6 @@ export default function EbookReaderModal({ ebook, onClose }) {
 						title={`Read ${item.title}`}
 						src={pdfUrl}
 						className="w-full flex-1 bg-slate-950"
-						sandbox="allow-same-origin allow-scripts allow-forms"
 						style={{ border: 'none' }}
 					/>
 				) : (

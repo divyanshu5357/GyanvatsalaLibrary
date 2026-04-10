@@ -22,7 +22,7 @@ async function fetchVerifiedProfile(accessToken) {
       
       if (response.status === 401) {
         console.error('Auth 401:', body?.error)
-        throw new Error('Invalid email or password')
+        throw new Error('Session expired or rejected by server. Please try again.')
       }
       
       if (response.status === 403) {
@@ -100,7 +100,9 @@ export function AuthProvider({ children }) {
       try {
         if (!isMounted) return
 
-        setLoading(true)
+        if (eventLabel !== 'SIGNED_OUT') {
+          setLoading(true)
+        }
         console.log(`🔍 Syncing auth state from ${eventLabel}...`)
 
         const { user, profile: profileData, shouldClear } = await resolveAuthState(session)
@@ -186,7 +188,29 @@ export function AuthProvider({ children }) {
 
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
-          throw new Error('Invalid email or password')
+          // Ask the server which field is wrong so we can show a specific message
+          try {
+            const checkRes = await fetch(`${apiBase}/api/auth/check-email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: normalizedEmail }),
+            })
+            const checkData = await checkRes.json()
+            if (!checkData.exists) {
+              throw new Error('No account found with this email address. Please contact admin.')
+            } else {
+              throw new Error('Incorrect password. Please try again.')
+            }
+          } catch (checkErr) {
+            // If check-email itself fails, fall back to generic message
+            if (
+              checkErr.message === 'No account found with this email address. Please contact admin.' ||
+              checkErr.message === 'Incorrect password. Please try again.'
+            ) {
+              throw checkErr
+            }
+            throw new Error('Invalid email or password')
+          }
         }
         throw error
       }
