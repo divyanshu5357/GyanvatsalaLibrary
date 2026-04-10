@@ -51,10 +51,12 @@ export default function Seo({
   robots = 'index,follow',
   image = DEFAULT_IMAGE,
   keywords = DEFAULT_KEYWORDS,
+  jsonLd,
 }) {
   useEffect(() => {
     document.title = title
 
+    // Basic
     upsertMeta('meta[name="description"]', { name: 'description', content: description })
     upsertMeta('meta[name="robots"]', { name: 'robots', content: robots })
     upsertMeta('meta[name="keywords"]', { name: 'keywords', content: keywords })
@@ -62,23 +64,24 @@ export default function Seo({
     // Open Graph
     upsertMeta('meta[property="og:title"]', { property: 'og:title', content: title })
     upsertMeta('meta[property="og:description"]', { property: 'og:description', content: description })
+    upsertMeta('meta[property="og:image"]', { property: 'og:image', content: new URL(image, window.location.origin).href })
+    upsertMeta('meta[property="og:url"]', { property: 'og:url', content: new URL(path, window.location.origin).href })
     upsertMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' })
-    upsertMeta('meta[property="og:url"]', { property: 'og:url', content: window.location.href })
-    upsertMeta('meta[property="og:image"]', { property: 'og:image', content: image })
-    upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'Gyanvatsala Library' })
 
     // Twitter
     upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' })
     upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title })
     upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description })
-    upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: image })
+    upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: new URL(image, window.location.origin).href })
 
-    upsertLink('canonical', window.location.href)
+    // Canonical
+    upsertLink('canonical', new URL(path, window.location.origin).href)
 
+    // JSON-LD
     if (jsonLd) {
       upsertJsonLd(jsonLd)
     }
-  }, [description, image, jsonLd, path, robots, title])
+  }, [title, description, path, robots, image, keywords, jsonLd])
 
   return null
 }
