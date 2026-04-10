@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 const DEFAULT_TITLE = 'Gyanvatsala Library Management System'
 const DEFAULT_DESCRIPTION = 'Manage library seats, ebooks, student fees, reminders, and study-room operations from one modern library management system.'
 const DEFAULT_IMAGE = '/social-preview.svg'
+const DEFAULT_KEYWORDS = 'gyanvatsala, gyanvatsal, gyanvatshala, gyanvatsla, library, study room, reading room, focused study, disciplined routine'
 
 function upsertMeta(selector, attributes) {
   let element = document.head.querySelector(selector)
@@ -49,35 +50,35 @@ export default function Seo({
   path = '/',
   robots = 'index,follow',
   image = DEFAULT_IMAGE,
-  type = 'website',
-  jsonLd,
+  keywords = DEFAULT_KEYWORDS,
 }) {
   useEffect(() => {
-    const siteUrl = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/+$/, '')
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`
-    const canonicalUrl = new URL(normalizedPath, `${siteUrl}/`).toString()
-    const imageUrl = image.startsWith('http') ? image : new URL(image, `${siteUrl}/`).toString()
-
     document.title = title
 
     upsertMeta('meta[name="description"]', { name: 'description', content: description })
     upsertMeta('meta[name="robots"]', { name: 'robots', content: robots })
+    upsertMeta('meta[name="keywords"]', { name: 'keywords', content: keywords })
+
+    // Open Graph
     upsertMeta('meta[property="og:title"]', { property: 'og:title', content: title })
     upsertMeta('meta[property="og:description"]', { property: 'og:description', content: description })
-    upsertMeta('meta[property="og:type"]', { property: 'og:type', content: type })
-    upsertMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl })
-    upsertMeta('meta[property="og:image"]', { property: 'og:image', content: imageUrl })
+    upsertMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' })
+    upsertMeta('meta[property="og:url"]', { property: 'og:url', content: window.location.href })
+    upsertMeta('meta[property="og:image"]', { property: 'og:image', content: image })
     upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'Gyanvatsala Library' })
+
+    // Twitter
     upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' })
     upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title })
     upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description })
-    upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: imageUrl })
-    upsertLink('canonical', canonicalUrl)
+    upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: image })
+
+    upsertLink('canonical', window.location.href)
 
     if (jsonLd) {
       upsertJsonLd(jsonLd)
     }
-  }, [description, image, jsonLd, path, robots, title, type])
+  }, [description, image, jsonLd, path, robots, title])
 
   return null
 }

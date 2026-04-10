@@ -26,6 +26,7 @@ import FeatureFlipCarousel from '../components/FeatureFlipCarousel'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getDashboardRoute } from '../utils/authRouting'
+import Seo from '../components/Seo'
 
 const heroImage = 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775065351/img11_dovqob.jpg'
 
@@ -171,6 +172,10 @@ export default function Landing() {
 
   return (
     <div id="top" className="min-h-screen overflow-hidden bg-black text-white">
+      <Seo
+        title="Gyanvatsala Library - Focused Study & Reading Environment"
+        description="Unlock your potential at Gyanvatsala Library. We offer a calm, disciplined environment with high-speed Wi-Fi, AC, and curated books to help you build strong study habits."
+      />
       <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/45 px-4 py-4 backdrop-blur-md sm:px-6">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 sm:gap-4">
           <Link
@@ -210,11 +215,10 @@ export default function Landing() {
 
             <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 text-center w-full max-w-3xl mx-auto">
               <h1 className="w-full text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-white">
-                Unlimited books, reading, and more.
+                Your Gateway to Focused Study and Limitless Knowledge.
               </h1>
               <p className="mt-8 w-full text-base sm:text-lg md:text-xl leading-relaxed text-gray-100">
-                Join a disciplined library environment built for focused study hours, better reading habits,
-                and steady academic progress.
+                <strong>Transform your study habits in an environment designed for success.</strong> Discover a space where deep focus is cultivated, discipline is strengthened, and every session propels you toward your academic and personal growth goals.
               </p>
 
               <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:justify-center w-full">
