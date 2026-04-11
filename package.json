@@ -15,5 +15,7 @@
     "build:client": "npm run build --workspace client",
     "start:server": "npm run start --workspace server"
   },
-  "devDependencies": {}
+  "dependencies": {
+    "lucide-react": "^1.8.0"
+  }
 }

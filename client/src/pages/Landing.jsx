@@ -27,6 +27,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getDashboardRoute } from '../utils/authRouting'
 import Seo from '../components/Seo'
+import ContactSection from '../components/ContactSection'
 
 const heroImage = 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775065351/img11_dovqob.jpg'
 
@@ -467,6 +468,8 @@ export default function Landing() {
           </Link>
         </div>
       </section>
+
+      <ContactSection />
 
       <footer className="border-t border-white/10 bg-black px-6 pt-12 pb-4 animate-fadeInUp">
         <div className="mx-auto max-w-7xl">
