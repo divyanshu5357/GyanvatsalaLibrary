@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../supabase'
 import { isPdfUrl, normalizePdfReadUrl } from '../../utils/cloudinaryUpload'
+import { buildApiUrl } from '../../utils/api'
 import { normalizeEbook } from '../../utils/ebooks'
 
 export default function EbookReaderModal({ ebook, onClose }) {
@@ -40,7 +41,7 @@ export default function EbookReaderModal({ ebook, onClose }) {
 					if (item.upload_type === 'cloudinary') {
 						const { data: { session } } = await supabase.auth.getSession()
 						const token = session?.access_token || ''
-						const proxyUrl = `/api/ebooks/${item.id}/proxy-pdf?token=${encodeURIComponent(token)}`
+						const proxyUrl = `${buildApiUrl(`/api/ebooks/${item.id}/proxy-pdf`)}?token=${encodeURIComponent(token)}`
 						console.log('✅ Fetching secure PDF via proxy stream')
 						finalUrl = proxyUrl
 					}

@@ -1118,6 +1118,7 @@ app.patch('/api/admin/students/:studentId', requireAuth, requireRole('admin'), a
       seatNumber,
       feeAmount,
       feeDueDate,
+      timeSlot,
     } = req.body || {}
 
     // Fetch student to get user_id
@@ -1138,6 +1139,7 @@ app.patch('/api/admin/students/:studentId', requireAuth, requireRole('admin'), a
       updates.fee_due_date = nextDueIso
       updates.next_due = nextDueIso
     }
+    if (timeSlot !== undefined) updates.time_slot = timeSlot || null
 
     // Update name in users table if provided
     if (name) {

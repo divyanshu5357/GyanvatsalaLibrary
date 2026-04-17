@@ -3,13 +3,10 @@ import { NavLink } from 'react-router-dom'
 
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   const navItems = [
-    { to: '/admin/students', label: '📚 Students', icon: '📚' },
-    { to: '/admin/ebooks', label: '📘 Manage Ebooks', icon: '📘' },
-    { to: '/admin/fees', label: '💳 Fees', icon: '💳' },
-    { to: '/admin/earnings', label: '💰 Earnings', icon: '💰' },
-    { to: '/admin/due-soon', label: '⏰ Due Soon', icon: '⏰' },
-    { to: '/admin/defaulters', label: '⚠️ Defaulters', icon: '⚠️' },
-    { to: '/notifications', label: '🔔 Notifications', icon: '🔔' },
+    { to: '/admin/students', label: 'Students', icon: '📚' },
+    { to: '/admin/ebooks', label: 'Manage Ebooks', icon: '📘' },
+    { to: '/admin/fees', label: 'Fees', icon: '💳' },
+    { to: '/admin/defaulters', label: 'Defaulters', icon: '⚠️' },
   ]
 
   return (
@@ -34,7 +31,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
               }
             >
               <span>{item.icon}</span>
-              <span>{item.label.split(' ').slice(1).join(' ')}</span>
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>

@@ -33,6 +33,14 @@ function resolveApiBase() {
 
 export const apiBase = resolveApiBase()
 
+export function buildApiUrl(path = '') {
+  const normalizedPath = String(path || '').startsWith('/')
+    ? String(path || '')
+    : `/${String(path || '')}`
+
+  return apiBase ? `${apiBase}${normalizedPath}` : normalizedPath
+}
+
 export async function authFetch(path, options = {}) {
   if (!supabase) {
     throw new Error('Supabase is not configured')

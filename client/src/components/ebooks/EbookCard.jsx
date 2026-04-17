@@ -52,6 +52,7 @@ export default function EbookCard({ ebook, onRead, onEdit, onDelete, showActions
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button
+          type="button"
           onClick={() => onRead?.(item)}
           className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-sm font-medium"
         >
@@ -61,12 +62,14 @@ export default function EbookCard({ ebook, onRead, onEdit, onDelete, showActions
         {showActions && (
           <>
             <button
+              type="button"
               onClick={() => onEdit?.(item)}
               className="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm"
             >
               ✏️ Edit
             </button>
             <button
+              type="button"
               onClick={() => onDelete?.(item)}
               className="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-sm"
             >

@@ -3,6 +3,7 @@ import { useAlert } from '../contexts/AlertContext'
 import AnimatedModal from './AnimatedModal'
 import PasswordModal from './PasswordModal'
 import FeeStatusBadge from './FeeStatusBadge'
+import TimeSlotPicker from './TimeSlotPicker'
 import { supabase } from '../supabase'
 import { getDueDate, isPaidForCurrentCycle } from '../utils/feeStatus'
 import { authFetch } from '../utils/api'
@@ -13,14 +14,14 @@ export default function StudentsList({ onMetrics = () => {}, feeFilter = 'all', 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [editingId, setEditingId] = useState(null)
-  const [form, setForm] = useState({ name: '', seatNumber: '', feeAmount: '', feeDueDate: '' })
+  const [form, setForm] = useState({ name: '', seatNumber: '', feeAmount: '', feeDueDate: '', timeSlot: '' })
   const [deleteModal, setDeleteModal] = useState({ open: false, studentId: null, studentName: '' })
   const [passwordModal, setPasswordModal] = useState({ open: false, studentId: null, studentName: '', isLoading: false })
 
   const computeAndSendMetrics = (list = []) => {
     const totalStudents = list.length
     const occupiedSeats = list.filter(s => !!s.seat_number).length
-    const totalSeats = Math.max(...list.map(s => Number(s.seat_number) || 0), 0) || occupiedSeats
+    const totalSeats = 40
     const pendingFees = list.filter(s => (s.fee_amount || s.fee_due_date || s.next_due) && !isPaidForCurrentCycle(s)).length
     if (useMetrics) onMetrics({ totalStudents, occupiedSeats, totalSeats, pendingFees })
   }
@@ -67,6 +68,7 @@ export default function StudentsList({ onMetrics = () => {}, feeFilter = 'all', 
       seatNumber: student.seat_number ?? '',
       feeAmount: student.fee_amount ?? '',
       feeDueDate: student.fee_due_date ? student.fee_due_date.split('T')[0] : student.next_due ? student.next_due.split('T')[0] : '',
+      timeSlot: student.time_slot || '',
     })
   }
 
@@ -81,6 +83,7 @@ export default function StudentsList({ onMetrics = () => {}, feeFilter = 'all', 
         seatNumber: form.seatNumber === '' ? null : form.seatNumber,
         feeAmount: form.feeAmount === '' ? null : form.feeAmount,
         feeDueDate: form.feeDueDate || null,
+        timeSlot: form.timeSlot || null,
       }
 
       const res = await authFetch(`/api/admin/students/${studentId}`, {
@@ -287,13 +290,20 @@ export default function StudentsList({ onMetrics = () => {}, feeFilter = 'all', 
     if (!feeFilter || feeFilter === 'all') return true
 
     const paid = isPaidForCurrentCycle(s)
-    const hasDue = !!(s.fee_amount || s.fee_due_date || s.next_due)
-    const now = new Date()
     const dueDate = getDueDate(s)
-    const isOverdue = dueDate ? dueDate < now && !paid : false
     
-    if (feeFilter === 'paid') return paid
-    if (feeFilter === 'due') return hasDue && !paid && !isOverdue
+    if (!dueDate) return false
+    
+    const now = new Date()
+    const daysUntilDue = Math.floor((dueDate - now) / (1000 * 60 * 60 * 24))
+    
+    // Status determination
+    const isOverdue = daysUntilDue < 0 && !paid
+    const isDue = daysUntilDue >= 0 && daysUntilDue <= 3 && !paid
+    const isPaidStatus = paid || (daysUntilDue > 3)
+    
+    if (feeFilter === 'paid') return isPaidStatus
+    if (feeFilter === 'due') return isDue
     if (feeFilter === 'overdue') return isOverdue
     return true
   })
@@ -310,6 +320,7 @@ export default function StudentsList({ onMetrics = () => {}, feeFilter = 'all', 
               <th className="text-left p-3">Email</th>
               <th className="text-left p-3">Phone</th>
               <th className="text-left p-3">Seat</th>
+              <th className="text-left p-3">Time Slot</th>
               <th className="text-left p-3">Fee Amount</th>
               <th className="text-left p-3">Status</th>
               <th className="text-left p-3">Joined</th>
@@ -349,6 +360,26 @@ export default function StudentsList({ onMetrics = () => {}, feeFilter = 'all', 
                     <input value={form.seatNumber} onChange={(e) => setForm(f => ({ ...f, seatNumber: e.target.value }))} className="w-full bg-transparent border p-1 rounded" />
                   ) : (
                     student.seat_number || 'N/A'
+                  )}
+                </td>
+                <td className="p-3 text-sm min-w-[180px]">
+                  {isEditing ? (
+                    <TimeSlotPicker
+                      value={form.timeSlot}
+                      onChange={(val) => setForm(f => ({ ...f, timeSlot: val }))}
+                    />
+                  ) : (
+                    <div className="inline-block w-full">
+                      {student.time_slot ? (
+                        <div className="px-4 py-2 bg-gradient-to-r from-indigo-600/40 to-indigo-500/40 border border-indigo-500/60 rounded-lg text-sm font-bold text-indigo-200 text-center">
+                          🕐 {student.time_slot}
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2 bg-slate-700/30 border border-slate-600/50 rounded-lg text-sm text-slate-500 text-center italic">
+                          —
+                        </div>
+                      )}
+                    </div>
                   )}
                 </td>
                 <td className="p-3">
