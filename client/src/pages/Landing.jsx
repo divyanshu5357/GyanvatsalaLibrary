@@ -22,7 +22,7 @@ function MobileSlider({ items, renderItem, autoSlideInterval = 1000 }) {
     </div>
   );
 }
-import FeatureFlipCarousel from '../components/FeatureFlipCarousel'
+import ThreeCardCarousel from '../components/ThreeCardCarousel'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getDashboardRoute } from '../utils/authRouting'
@@ -85,46 +85,68 @@ const reasonsToJoin = [
 // Library Features Section Data
 const libraryFeatures = [
   {
-    icon: '🎯',
-    title: 'Study-Friendly Environment',
-    body: 'A calm and distraction-free space designed to improve focus and productivity.',
-  },
-  {
-    icon: '📰',
-    title: 'Daily Newspapers (Hindi & English)',
-    body: 'Stay updated with current affairs through both Hindi and English newspapers.',
+    icon: '🧘',
+    title: 'Focused Study Environment',
+    body: 'A calm and distraction-free space designed to improve concentration and productivity.',
   },
   {
     icon: '📶',
     title: 'High-Speed Wi-Fi',
-    body: 'Access fast and reliable internet for online study, research, and learning.',
+    body: 'Reliable internet access for online learning, research, and study materials.',
   },
   {
     icon: '❄️',
-    title: 'Air-Conditioned Rooms',
-    body: 'Comfortable air-conditioned rooms to ensure a pleasant study experience.',
+    title: 'Air-Conditioned Space',
+    body: 'Comfortable temperature-controlled environment for long study sessions.',
+  },
+
+  {
+    icon: '🪑',
+    title: 'Comfortable Seating',
+    body: 'Ergonomic chairs and desks designed for extended study hours without discomfort.',
+  },
+  {
+    icon: '🔇',
+    title: 'Quiet Study Zone',
+    body: 'Maintained silence and discipline for uninterrupted and focused study.',
   },
   {
     icon: '⏳',
-    title: 'Limited Seating (Only 40 Seats)',
-    body: 'Limited seats to maintain discipline, reduce noise, and enhance concentration.',
+    title: 'Limited Seating',
+    body: 'Only 40 seats to ensure a peaceful, less crowded, and productive atmosphere.',
   },
+
   {
-    icon: '💺',
-    title: 'Comfortable Seating',
-    body: 'Ergonomic chairs and desks designed for long and comfortable study hours.',
-  },
-  {
-    icon: '📹',
-    title: '24/7 CCTV Surveillance',
-    body: 'Continuous monitoring to ensure safety and security for all students.',
+    icon: '📰',
+    title: 'Daily Newspapers',
+    body: 'Stay updated with current affairs through Hindi and English newspapers.',
   },
   {
     icon: '💧',
     title: 'RO Drinking Water',
-    body: 'Clean and safe drinking water available for everyone.',
+    body: 'Clean and safe drinking water available at all times.',
   },
-]
+  {
+    icon: '📹',
+    title: '24/7 Security',
+    body: 'Continuous CCTV surveillance for a safe and secure study environment.',
+  },
+  {
+    icon: '🔌',
+    title: 'Power Outlets',
+    body: 'Conveniently placed charging points to keep your devices powered during long study sessions.',
+  },
+  {
+    icon: '🧾',
+    title: 'Printing & Scanning',
+    body: 'Onsite printing and scanning facilities for quick access to study materials.',
+  },
+  {
+    icon: '📦',
+    title: 'Locker Service',
+    body: 'Secure lockers are available for personal belongings while you study.',
+  },
+];
 
 function TypingQuote({ quote, speed = 40 }) {
   const [displayedText, setDisplayedText] = useState('')
@@ -167,6 +189,27 @@ export default function Landing() {
     return () => window.clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    const elements = document.querySelectorAll('[data-reveal="features"]')
+    if (elements.length === 0) return undefined
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.15 }
+    )
+
+    elements.forEach((el) => observer.observe(el))
+
+    return () => observer.disconnect()
+  }, [])
+
   if (currentUser && profile?.role) {
     return <Navigate to={getDashboardRoute(profile.role)} replace />
   }
@@ -200,25 +243,25 @@ export default function Landing() {
         </div>
       </nav>
 
-      <section className="bg-gradient-to-br from-[#05081c] via-[#17123b] to-[#3a1250] px-4 pb-16 pt-24 sm:px-6 sm:pb-24 sm:pt-28">
-        <div className="mx-auto max-w-6xl">
+  <section className="bg-[#0a0a0a] px-4 pb-20 pt-28 sm:px-6 sm:pb-32 sm:pt-36">
+        <div className="mx-auto max-w-7xl">
           <div
-            className="relative min-h-[600px] sm:min-h-[700px] flex items-center justify-center overflow-hidden rounded-[2rem] shadow-2xl"
+            className="relative min-h-[520px] sm:min-h-[680px] lg:min-h-[760px] flex items-center justify-center overflow-hidden rounded-[2.5rem] shadow-2xl"
             style={{
-              boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              boxShadow: '0 40px 80px -25px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.04)',
             }}
           >
             <div
               className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${heroImage})` }}
+              style={{ backgroundImage: `url(${heroImage})`, backgroundSize: '200% auto', backgroundPosition: 'center center' }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/40 to-black/65" />
 
-            <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16 text-center w-full max-w-3xl mx-auto">
-              <h1 className="w-full text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-white">
-                Your Gateway to Focused Study and Limitless Knowledge.
+            <div className="relative z-10 flex flex-col items-center justify-center px-6 py-24 text-center w-full max-w-4xl mx-auto">
+              <h1 className="w-full text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight text-white text-balance">
+                Gyanvatsala Library
               </h1>
-              <p className="mt-8 w-full text-base sm:text-lg md:text-xl leading-relaxed text-gray-100">
+              <p className="mt-8 w-full text-lg sm:text-xl md:text-2xl leading-relaxed text-gray-100">
                 <strong>Transform your study habits in an environment designed for success.</strong> Discover a space where deep focus is cultivated, discipline is strengthened, and every session propels you toward your academic and personal growth goals.
               </p>
 
@@ -243,7 +286,7 @@ export default function Landing() {
 
       <section className="bg-slate-950 px-4 pb-8 pt-12 sm:px-6 sm:pb-10 sm:pt-14">
         <div className="mx-auto max-w-[1500px] text-center">
-          <p className="min-h-0 text-xl font-bold leading-tight tracking-tight text-gray-100 sm:text-2xl md:text-[1.9rem] lg:whitespace-nowrap lg:text-[2.1rem] xl:text-[2.3rem]">
+          <p className="heading-font min-h-0 text-xl font-bold leading-tight tracking-tight text-gray-100 sm:text-2xl md:text-[1.9rem] lg:whitespace-nowrap lg:text-[2.1rem] xl:text-[2.3rem]">
             <span className="text-slate-300">"</span>{' '}
             <TypingQuote key={quoteKey} quote={quotes[currentQuoteIndex]} speed={40} />
             <span className="text-slate-300">"</span>
@@ -315,33 +358,26 @@ export default function Landing() {
             </p>
           </div>
           {/* Mobile horizontal slider for features */}
-          <div className="block sm:hidden">
+          <div className="block lg:hidden">
             <MobileSlider
               items={libraryFeatures}
               autoSlideInterval={1000}
-              renderItem={(feature, idx) => (
-                <div
-                  className="card-hover group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
-                  onClick={e => e.currentTarget.classList.toggle('flipped')}
-                >
-                  <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
-                    {/* Front */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-violet-700/30 bg-[#1a1c2e] shadow-xl text-7xl text-white transition-all duration-500 [backface-visibility:hidden]">
-                      {feature.icon}
+              renderItem={(feature) => (
+                <div className="w-full sm:w-[88%] max-w-[360px] sm:max-w-[560px] mx-auto min-h-[325px] sm:min-h-[345px]">
+                  <article data-reveal="features" className="card-glow h-full rounded-2xl px-5 pt-6 pb-5 sm:px-6 sm:pt-7 sm:pb-6 md:px-7 md:pt-8 md:pb-7 flex flex-col items-center text-center gap-2 text-white bg-[#0f0f14] min-h-[320px] sm:min-h-[340px]">
+                    <div className="text-5xl sm:text-6xl flex items-center justify-center">{feature.icon}</div>
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-bold">{feature.title}</h4>
+                      <p className="mt-1 text-sm sm:text-base text-white/85">{feature.body}</p>
                     </div>
-                    {/* Back */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-violet-700/30 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-xl text-center px-6 text-white [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                      <div className="mb-2 text-3xl font-bold">{feature.title}</div>
-                      <div className="text-base text-gray-100">{feature.body}</div>
-                    </div>
-                  </div>
+                  </article>
                 </div>
               )}
             />
           </div>
-          {/* Desktop carousel as before */}
-          <div className="hidden sm:block">
-            <FeatureFlipCarousel features={libraryFeatures} cardsPerSlide={3} autoSlideInterval={3000} />
+          {/* Desktop three-card carousel (auto-slide every 1s) */}
+          <div className="hidden lg:block">
+            <ThreeCardCarousel items={libraryFeatures} cardWidth={420} />
           </div>
         </div>
       </section>
@@ -350,50 +386,32 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl">
           <h2 className="text-center text-4xl font-bold md:text-5xl">Advantages of Joining the Library</h2>
           {/* Mobile horizontal slider for advantages */}
-          <div className="block md:hidden mt-16">
+          <div className="block lg:hidden mt-16">
             <MobileSlider
               items={advantages}
               autoSlideInterval={1000}
-              renderItem={(item, idx) => (
-                <div
-                className="card-hover group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
-                  onClick={e => e.currentTarget.classList.toggle('flipped')}
-                >
-                  <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
-                    {/* Front */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
-                      {item.icon}
+              renderItem={(item) => (
+                <div className="w-full sm:w-[88%] max-w-[360px] sm:max-w-[560px] mx-auto">
+                  <article className="card-glow h-full rounded-2xl px-5 pt-6 pb-5 sm:px-6 sm:pt-7 sm:pb-6 md:px-7 md:pt-8 md:pb-7 flex flex-col items-center text-center gap-2 text-white bg-[#0f0f14] min-h-[325px] sm:min-h-[345px]">
+                    <div className="text-5xl sm:text-6xl flex items-center justify-center">{item.icon}</div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-bold">{item.title}</h3>
+                      <p className="mt-1 text-sm sm:text-base text-white/85">{item.body}</p>
                     </div>
-                    {/* Back */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                      <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
-                      <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
-                    </div>
-                  </div>
+                  </article>
                 </div>
               )}
             />
           </div>
           {/* Desktop grid as before */}
-          <div className="hidden md:grid mt-16 grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="hidden lg:grid mt-16 grid-cols-1 gap-8 lg:grid-cols-3">
             {advantages.map((item, idx) => (
-              <div
-                key={item.title}
-                className="card-hover group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
-                onMouseEnter={e => e.currentTarget.classList.add('flipped')}
-                onMouseLeave={e => e.currentTarget.classList.remove('flipped')}
-              >
-                <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
-                  {/* Front */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
-                    {item.icon}
-                  </div>
-                  {/* Back */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                    <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
-                    <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
-                  </div>
-                </div>
+              <div key={item.title} className="w-full">
+                <article className="card-glow min-h-[360px] rounded-2xl p-10 flex flex-col justify-center text-white bg-[#0f0f14]">
+                  <div className="text-7xl mb-6 flex items-center justify-center">{item.icon}</div>
+                  <h3 className="text-2xl font-bold text-center">{item.title}</h3>
+                  <p className="mt-4 text-base leading-7 text-white/85 text-center">{item.body}</p>
+                </article>
               </div>
             ))}
           </div>
@@ -404,50 +422,32 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl">
           <h2 className="text-center text-4xl font-bold md:text-5xl">Why Join Gyanvatsala?</h2>
           {/* Mobile horizontal slider for reasons */}
-          <div className="block md:hidden mt-16">
+          <div className="block lg:hidden mt-16">
             <MobileSlider
               items={reasonsToJoin}
               autoSlideInterval={2000}
-              renderItem={(item, idx) => (
-                <div
-                className="card-hover group [perspective:1000px] w-72 h-72 cursor-pointer mx-auto"
-                  onClick={e => e.currentTarget.classList.toggle('flipped')}
-                >
-                  <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
-                    {/* Front */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
-                      {item.icon}
+              renderItem={(item) => (
+                <div className="w-full sm:w-[88%] max-w-[360px] sm:max-w-[560px] mx-auto">
+                  <article className="card-glow h-full rounded-2xl px-5 pt-6 pb-5 sm:px-6 sm:pt-7 sm:pb-6 md:px-7 md:pt-8 md:pb-7 flex flex-col items-center text-center gap-2 text-white bg-[#0f0f14]">
+                    <div className="text-5xl sm:text-6xl flex items-center justify-center">{item.icon}</div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-bold">{item.title}</h3>
+                      <p className="mt-1 text-sm sm:text-base text-white/85">{item.body}</p>
                     </div>
-                    {/* Back */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                      <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
-                      <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
-                    </div>
-                  </div>
+                  </article>
                 </div>
               )}
             />
           </div>
           {/* Desktop grid as before */}
-          <div className="hidden md:grid mt-16 grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="hidden lg:grid mt-16 grid-cols-1 gap-8 lg:grid-cols-3">
             {reasonsToJoin.map((item, idx) => (
-              <div
-                key={item.title}
-                className="card-hover group [perspective:1000px] w-full h-full min-h-[320px] cursor-pointer"
-                onMouseEnter={e => e.currentTarget.classList.add('flipped')}
-                onMouseLeave={e => e.currentTarget.classList.remove('flipped')}
-              >
-                <div className="relative w-full h-full duration-700 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
-                  {/* Front */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 p-10 shadow-xl text-5xl text-white transition-all duration-500 [backface-visibility:hidden]">
-                    {item.icon}
-                  </div>
-                  {/* Back */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-slate-700 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-10 shadow-xl text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                    <h3 className="text-2xl font-bold text-white drop-shadow">{item.title}</h3>
-                    <p className="mt-4 text-base leading-7 text-gray-100 drop-shadow">{item.body}</p>
-                  </div>
-                </div>
+              <div key={item.title} className="w-full">
+                <article className="card-glow min-h-[360px] rounded-2xl p-10 flex flex-col justify-center text-white bg-[#0f0f14]">
+                  <div className="text-7xl mb-6 flex items-center justify-center">{item.icon}</div>
+                  <h3 className="text-2xl font-bold text-center">{item.title}</h3>
+                  <p className="mt-4 text-base leading-7 text-white/85 text-center">{item.body}</p>
+                </article>
               </div>
             ))}
           </div>

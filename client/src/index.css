@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -60,8 +62,13 @@ html, body, #root {
 }
 
 body {
-  @apply bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-100;
+  background-color: #050505;
+  color: #f8fafc; /* keep text light */
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+h1, h2, h3, h4, .heading-font {
+  font-family: 'Playfair Display', 'Times New Roman', serif;
 }
 
 .glass {
@@ -114,6 +121,52 @@ body {
 .card-hover:hover::after {
   opacity: 1;
   transform: scale(1);
+}
+
+/* Simple hover border glow for cards */
+.card-glow {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 240ms ease, border-color 240ms ease, box-shadow 240ms ease;
+}
+
+.card-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.15),
+    0 0 16px rgba(192, 132, 252, 0.35),
+    0 0 28px rgba(59, 130, 246, 0.2);
+  opacity: 0;
+  transition: opacity 240ms ease;
+  pointer-events: none;
+}
+
+.card-glow:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px);
+}
+
+.card-glow:hover::after {
+  opacity: 1;
+}
+
+/* Scroll reveal animation */
+.reveal-on-scroll,
+[data-reveal="features"] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 420ms ease, transform 420ms ease;
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible,
+[data-reveal="features"].is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Enhanced animations */
