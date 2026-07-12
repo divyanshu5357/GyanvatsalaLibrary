@@ -1,12 +1,24 @@
 import React, { useEffect, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
+
+import ContactSection from '../components/ContactSection'
+import Seo from '../components/Seo'
+import ThreeCardCarousel from '../components/ThreeCardCarousel'
+import { useAuth } from '../contexts/AuthContext'
+import { getDashboardRoute } from '../utils/authRouting'
 
 // MobileSlider component for horizontal swipe/slide on mobile
 function MobileSlider({ items, renderItem, autoSlideInterval = 1000 }) {
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(0)
+
   useEffect(() => {
-    const timer = setTimeout(() => setIndex((i) => (i + 1) % items.length), autoSlideInterval);
-    return () => clearTimeout(timer);
-  }, [index, items.length, autoSlideInterval]);
+    const timer = window.setTimeout(
+      () => setIndex((i) => (i + 1) % items.length),
+      autoSlideInterval
+    )
+    return () => window.clearTimeout(timer)
+  }, [index, items.length, autoSlideInterval])
+
   return (
     <div className="relative w-full flex flex-col items-center">
       <div className="flex items-center justify-center w-full">
@@ -16,18 +28,15 @@ function MobileSlider({ items, renderItem, autoSlideInterval = 1000 }) {
       </div>
       <div className="flex justify-center gap-2 mt-4">
         {items.map((_, i) => (
-          <span key={i} className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-violet-400' : 'bg-gray-600'}`}></span>
+          <span
+            key={i}
+            className={`inline-block w-2 h-2 rounded-full ${i === index ? 'bg-violet-400' : 'bg-gray-600'}`}
+          />
         ))}
       </div>
     </div>
-  );
+  )
 }
-import ThreeCardCarousel from '../components/ThreeCardCarousel'
-import { Link, Navigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { getDashboardRoute } from '../utils/authRouting'
-import Seo from '../components/Seo'
-import ContactSection from '../components/ContactSection'
 
 const heroImage = 'https://res.cloudinary.com/dghcsoc48/image/upload/v1775065351/img11_dovqob.jpg'
 
