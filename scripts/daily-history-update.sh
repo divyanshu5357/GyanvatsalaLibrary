@@ -33,9 +33,6 @@ if git diff --staged --quiet; then
   exit 0
 fi
 
-commit_timestamp="$(date -j -f '%Y-%m-%d' "$target_date" '+%Y-%m-%dT12:00:00%z')"
-GIT_AUTHOR_DATE="$commit_timestamp" \
-GIT_COMMITTER_DATE="$commit_timestamp" \
 git commit -m "Update for $update_date"
 
 git push origin main

@@ -4,6 +4,8 @@
 <dict>
   <key>Label</key>
   <string>com.gyanvatsala.library.daily-history</string>
+  <key>Disabled</key>
+  <true/>
   <key>ProgramArguments</key>
   <array>
     <string>/Users/sakshisingh/Desktop/Frontend/react_js/LibararyManagment/scripts/daily-history-update.sh</string>

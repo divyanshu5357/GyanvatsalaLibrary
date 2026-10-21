@@ -17,7 +17,9 @@ permissions:
 jobs:
   update-history:
     name: Append Daily History Entry
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -69,7 +71,6 @@ jobs:
         if: steps.update_step.outputs.has_changes == 'true'
         env:
           DATE_STR: ${{ steps.update_step.outputs.date_str }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -91,11 +92,10 @@ jobs:
           git commit -m "${COMMIT_MSG}"
           echo "Created commit: ${COMMIT_MSG}"
 
-          # Rebase on latest origin/main before pushing to avoid conflicts
-          echo "Pulling latest changes from origin/main..."
-          git pull --rebase origin main
-
           # Push changes back to main branch
           echo "Pushing commit to origin/main..."
-          git push origin main
+          if ! git push origin HEAD:main; then
+            echo "::error::Push to origin/main failed. Review checkout permissions and branch protection settings."
+            exit 1
+          fi
           echo "Successfully pushed daily history commit!"
