@@ -1,0 +1,101 @@
+name: Daily History Automation
+
+'on':
+  schedule:
+    # 12:00 PM Indian Standard Time (IST, UTC+5:30) is 06:30 AM UTC.
+    # Scheduled to run every day at 06:30 UTC.
+    - cron: '30 6 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions interface
+
+concurrency:
+  group: daily-history-update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update-history:
+    name: Append Daily History Entry
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Calculate IST Date and Update history.txt
+        id: update_step
+        env:
+          TZ: 'Asia/Kolkata'
+        run: |
+          set -euo pipefail
+
+          # Compute the current date in Indian Standard Time (IST)
+          # Format follows the repository convention: "October 21"
+          UPDATE_DATE=$(date +'%B %-d')
+          UPDATE_LINE="// Update on ${UPDATE_DATE}"
+
+          echo "Target Date (IST): ${UPDATE_DATE}"
+          echo "Target Line: ${UPDATE_LINE}"
+          echo "date_str=${UPDATE_DATE}" >> "$GITHUB_OUTPUT"
+
+          # Verify that history.txt exists
+          if [ ! -f history.txt ]; then
+            echo "::error::history.txt not found in repository root!"
+            exit 1
+          fi
+
+          # Duplicate check: prevent duplicate entry if workflow runs multiple times today
+          if grep -Fxq "${UPDATE_LINE}" history.txt; then
+            echo "Entry '${UPDATE_LINE}' already exists in history.txt. Skipping to avoid duplicate."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Ensure the file ends with a newline before appending
+          if [ -s history.txt ] && [ "$(tail -c 1 history.txt)" != "" ]; then
+            echo "" >> history.txt
+          fi
+
+          # Append the single daily entry
+          echo "${UPDATE_LINE}" >> history.txt
+          echo "Successfully appended: ${UPDATE_LINE}"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and Push Changes
+        if: steps.update_step.outputs.has_changes == 'true'
+        env:
+          DATE_STR: ${{ steps.update_step.outputs.date_str }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Configure Git Author Identity for GitHub Actions
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage ONLY history.txt to prevent accidental staging of unrelated files
+          git add history.txt
+
+          # Check if there are staged differences
+          if git diff --staged --quiet; then
+            echo "No changes staged. Nothing to commit."
+            exit 0
+          fi
+
+          # Commit with repository's established naming convention
+          COMMIT_MSG="Update for ${DATE_STR}"
+          git commit -m "${COMMIT_MSG}"
+          echo "Created commit: ${COMMIT_MSG}"
+
+          # Rebase on latest origin/main before pushing to avoid conflicts
+          echo "Pulling latest changes from origin/main..."
+          git pull --rebase origin main
+
+          # Push changes back to main branch
+          echo "Pushing commit to origin/main..."
+          git push origin main
+          echo "Successfully pushed daily history commit!"
