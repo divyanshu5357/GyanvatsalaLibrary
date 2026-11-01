@@ -74,9 +74,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Configure Git Author Identity for GitHub Actions
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Attribute genuine automated repository updates to the repository owner.
+          # This email must be verified on the GitHub account for contribution credit.
+          git config user.name "divyanshu5357"
+          git config user.email "divyanshusingh17102002@gmail.com"
 
           # Stage ONLY history.txt to prevent accidental staging of unrelated files
           git add history.txt
